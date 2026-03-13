@@ -107,6 +107,7 @@ If you later want HTTP mode, the current separation between Slack transport and 
 - Bun 1.3+
 - PostgreSQL 15+ (or compatible managed Postgres service)
 - A Slack workspace where you can install a private app
+- Docker 24+ with Docker Compose v2 (optional, for containerized workflows)
 
 ## Quick start
 
@@ -159,6 +160,120 @@ For a compiled production build:
 bun run build
 bun run start
 ```
+
+## Docker
+
+The repository includes a production-oriented `Dockerfile` that builds the TypeScript app and runs the compiled worker as a non-root user.
+
+Important container behavior:
+
+- the app still runs in **Socket Mode**
+- the container does **not** expose an inbound HTTP port by default
+- you must provide the same Slack and database environment variables that native runs use
+
+Build the image:
+
+```bash
+bun run docker:build
+```
+
+Run database migrations inside the image:
+
+```bash
+docker run --rm \
+  --env-file .env \
+  free-slack-poll:local \
+  node dist/db/migrate.js
+```
+
+Run the worker:
+
+```bash
+docker run --rm \
+  --env-file .env \
+  free-slack-poll:local
+```
+
+If you want a lightweight container check before starting the worker, run the preflight command instead:
+
+```bash
+docker run --rm \
+  --env-file .env \
+  free-slack-poll:local \
+  node dist/scripts/preflight.js
+```
+
+## Docker Compose
+
+`compose.yaml` provides a small single-host setup with:
+
+- `db` for PostgreSQL
+- `migrate` for one-shot schema migrations
+- `app` for the long-running Socket Mode worker
+
+Create a Compose-specific env file:
+
+```bash
+cp .env.compose.example .env.compose
+```
+
+Then update the Slack token values in `.env.compose` as needed. The included `DATABASE_URL` already points at the Compose PostgreSQL service (`db`), so it differs from the default localhost example used for native development.
+
+Start PostgreSQL:
+
+```bash
+docker compose --env-file .env.compose up -d db
+```
+
+Apply migrations:
+
+```bash
+docker compose --env-file .env.compose --profile tools run --rm migrate
+```
+
+Start the worker:
+
+```bash
+docker compose --env-file .env.compose up -d app
+```
+
+Stop everything and remove volumes:
+
+```bash
+docker compose --env-file .env.compose down --volumes
+```
+
+## Container sanity checks
+
+The repository includes smoke checks that validate the container image, Compose wiring, database connectivity, and migration path without requiring a live Slack workspace.
+
+Validate the Compose configuration:
+
+```bash
+bun run compose:config
+```
+
+Run the standalone Docker smoke test:
+
+```bash
+bun run docker:smoke
+```
+
+Run the Docker Compose smoke test:
+
+```bash
+bun run compose:smoke
+```
+
+These checks use placeholder Slack values and focus on:
+
+- image build success
+- required environment variable validation
+- PostgreSQL reachability
+- migration execution
+- container filesystem/runtime assumptions
+
+They intentionally do **not** attempt a live Slack Socket Mode connection.
 
 ## Environment variables
 
@@ -223,11 +338,16 @@ Migration behavior:
 bun run dev
 bun run build
 bun run start
+bun run preflight
 bun run typecheck
 bun run lint
 bun run test
 bun run db:migrate
 bun run db:generate
+bun run docker:build
+bun run docker:smoke
+bun run compose:config
+bun run compose:smoke
 ```
 
 ## Testing
@@ -270,6 +390,8 @@ The pure/tested core covers:
 - scheduled close behavior
 - App Home publishing logic
 
+Container packaging is also checked in CI through `.github/workflows/docker-sanity-checks.yml`.
+
 ## Deployment notes
 
 This version is optimized for a **single worker** deployment:
@@ -284,6 +406,13 @@ Recommended production shape:
 - environment variables injected by your platform
 - one long-running process
 - logs forwarded from stdout/stderr
+
+For Docker Compose specifically:
+
+- treat it as a **single-host** deployment option
+- run `migrate` before `app`
+- no published inbound port is required for Socket Mode
+- prefer managed secrets/config injection over checked-in env files
 
 ## Operational tradeoffs
 
@@ -312,6 +441,9 @@ Multiple-choice polls use **simple multi-select** semantics in v1.
 - additional moderation flows
 - public-distribution hardening
 - HTTP mode receiver option
+- publish versioned container images
+- add container image vulnerability scanning
+- add a Compose override for local live-reload development
 
 ## License
 

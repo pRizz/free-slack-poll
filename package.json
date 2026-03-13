@@ -10,15 +10,20 @@
   },
   "scripts": {
     "dev": "bunx tsx watch src/app.ts",
-    "build": "bunx tsc -p tsconfig.json",
+    "build": "bunx tsc -p tsconfig.build.json",
     "start": "node dist/app.js",
+    "preflight": "bunx tsx src/scripts/preflight.ts",
     "typecheck": "bunx tsc --noEmit -p tsconfig.json",
     "lint": "bunx @biomejs/biome lint .",
     "format": "bunx @biomejs/biome format --write .",
     "test": "bunx vitest run",
     "test:watch": "bunx vitest",
     "db:generate": "bunx drizzle-kit generate",
-    "db:migrate": "bunx tsx src/db/migrate.ts"
+    "db:migrate": "bunx tsx src/db/migrate.ts",
+    "docker:build": "docker build -t free-slack-poll:local .",
+    "docker:smoke": "./scripts/docker-smoke.sh docker",
+    "compose:config": "docker compose --env-file .env.compose.example config",
+    "compose:smoke": "./scripts/docker-smoke.sh compose"
   },
   "dependencies": {
     "@slack/bolt": "^4.6.0",

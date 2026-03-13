@@ -1,0 +1,27 @@
+name: Docker sanity checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - cursor/**
+
+jobs:
+  docker-sanity-checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose configuration
+        run: docker compose --env-file .env.compose.example config
+
+      - name: Run Docker smoke test
+        run: ./scripts/docker-smoke.sh docker
+
+      - name: Run Docker Compose smoke test
+        run: ./scripts/docker-smoke.sh compose
