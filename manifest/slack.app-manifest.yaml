@@ -1,0 +1,51 @@
+display_information:
+  name: Free Slack Poll
+  description: Internal Slack polling app with modals, live updates, and scheduled closing.
+  background_color: "#1D9BF0"
+
+features:
+  app_home:
+    home_tab_enabled: true
+    messages_tab_enabled: false
+    messages_tab_read_only_enabled: true
+  bot_user:
+    display_name: Free Slack Poll
+    always_online: false
+  shortcuts:
+    - name: New poll
+      type: global
+      callback_id: create_poll_global
+      description: Create a new poll
+    - name: Create poll
+      type: message
+      callback_id: create_poll_from_message
+      description: Create a poll from a message
+  slash_commands:
+    - command: /poll
+      description: Create a new poll
+      usage_hint: "[optional topic]"
+      should_escape: false
+
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - channels:join
+      - channels:read
+      - chat:write
+      - chat:write.public
+      - commands
+      - groups:read
+      - im:read
+      - mpim:read
+      - users:read
+
+settings:
+  event_subscriptions:
+    bot_events:
+      - app_home_opened
+  interactivity:
+    is_enabled: true
+  org_deploy_enabled: false
+  socket_mode_enabled: true
+  token_rotation_enabled: false
