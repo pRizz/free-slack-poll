@@ -27,19 +27,21 @@ export function buildPollMessageViewModel(snapshot: PollSnapshot): PollMessageVi
       : null,
   }));
 
-  const managementActions: PollMessageViewModel["managementActions"] = [
-    {
-      key: "view_details",
-      text: "View details",
-      value: snapshot.poll.id,
-    },
-  ];
+  const managementActions: PollMessageViewModel["managementActions"] = [];
 
   if (snapshot.poll.status === "open") {
     managementActions.unshift({
       key: "close_poll",
       style: "danger",
       text: "Close poll",
+      value: snapshot.poll.id,
+    });
+  }
+
+  if (!snapshot.poll.isAnonymous) {
+    managementActions.push({
+      key: "view_details",
+      text: "View details",
       value: snapshot.poll.id,
     });
   }
