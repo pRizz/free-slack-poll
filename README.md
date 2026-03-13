@@ -243,6 +243,18 @@ Stop everything and remove volumes:
 docker compose --env-file .env.compose down --volumes
 ```
 
+## Platform deployment guides
+
+The local Compose file is the baseline deployment model for this project. Dedicated platform guides explain how to use that same Docker / Compose architecture on hosted platforms:
+
+- [`docs/deployment/README.md`](docs/deployment/README.md) — shared deployment overview and platform comparison
+- [`docs/deployment/railway.md`](docs/deployment/railway.md) — Railway guide
+- [`docs/deployment/render.md`](docs/deployment/render.md) — Render guide
+- [`docs/deployment/fly-io.md`](docs/deployment/fly-io.md) — Fly.io guide
+- [`docs/deployment/coolify.md`](docs/deployment/coolify.md) — Coolify guide
+
+The guides call out where a platform supports a native Compose flow directly and where the Compose services need to be translated into platform-specific resources such as managed Postgres, pre-deploy migration commands, or worker services.
+
 ## Container sanity checks
 
 The repository includes smoke checks that validate the container image, Compose wiring, database connectivity, and migration path without requiring a live Slack workspace.
