@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { PollCloseWorker } from "../../../src/jobs/pollCloseWorker.js";
-import { AuthorizationService } from "../../../src/services/authorizationService.js";
-import { PollCloseService } from "../../../src/services/pollCloseService.js";
+import { PollSyncWorker } from "../../../src/jobs/pollSyncWorker.js";
+import { PollPostingService } from "../../../src/services/pollPostingService.js";
+import { PollCreationService } from "../../../src/services/pollCreationService.js";
+import { PollSyncService } from "../../../src/services/pollSyncService.js";
 import {
   InMemoryPollEventStore,
   InMemoryPollStore,
@@ -11,64 +12,51 @@ import {
   SequentialIdGenerator,
 } from "../../helpers/inMemoryPorts.js";
 import { createTestLogger } from "../../helpers/testLogger.js";
-import { PollCreationService } from "../../../src/services/pollCreationService.js";
-import { PollPostingService } from "../../../src/services/pollPostingService.js";
 
-describe("PollCloseWorker", () => {
-  it("closes overdue polls and syncs the Slack message", async () => {
-    const creationClock = {
+describe("PollSyncWorker", () => {
+  it("syncs pending poll messages and clears the pending flag", async () => {
+    const clock = {
       now() {
         return new Date("2026-03-13T10:00:00.000Z");
-      },
-    };
-    const workerClock = {
-      now() {
-        return new Date("2026-03-13T12:00:00.000Z");
       },
     };
     const pollStore = new InMemoryPollStore();
     const workspaceStore = new InMemoryWorkspaceStore();
     const pollEventStore = new InMemoryPollEventStore();
     const slackMessagePublisher = new InMemorySlackMessagePublisher();
-    const authorizationService = new AuthorizationService([]);
-    const idGenerator = new SequentialIdGenerator();
     const creationService = new PollCreationService(
       {
-        idGenerator,
+        idGenerator: new SequentialIdGenerator(),
         pollEventStore,
         pollStore,
         workspaceStore,
       },
-      creationClock,
+      clock,
     );
     const postingService = new PollPostingService({
       pollEventStore,
       pollStore,
       slackMessagePublisher,
     });
-    const closeService = new PollCloseService({
-      authorizationService,
-      clock: workerClock,
-      pollEventStore,
+    const syncService = new PollSyncService({
       pollStore,
       slackMessagePublisher,
     });
-    const worker = new PollCloseWorker({
-      clock: workerClock,
+    const worker = new PollSyncWorker({
       logger: createTestLogger(),
-      pollCloseService: closeService,
       pollStore,
+      pollSyncService: syncService,
     });
 
     const createdPoll = await creationService.createPoll({
       allowOptionAdditions: false,
       allowsMultipleChoices: false,
       allowVoteChanges: true,
-      closesAt: new Date("2026-03-13T11:00:00.000Z"),
+      closesAt: null,
       creatorUserId: "U_CREATOR",
       isAnonymous: false,
       options: ["Alpha", "Beta"],
-      question: "Auto close me",
+      question: "Sync me",
       resultsVisibility: "always_visible",
       sourceType: "slash_command",
       targetConversationId: "C_123",
@@ -77,21 +65,17 @@ describe("PollCloseWorker", () => {
     });
 
     await postingService.postPoll(createdPoll.pollId, createdPoll.targetConversationId);
+    await pollStore.markSlackSyncState(createdPoll.pollId, true);
 
-    const closedPollCount = await worker.runOnce();
+    const syncedPollCount = await worker.runOnce();
     const snapshot = await pollStore.findSnapshotById(createdPoll.pollId);
 
-    expect(closedPollCount).toBe(1);
-    expect(snapshot?.poll.status).toBe("closed");
+    expect(syncedPollCount).toBe(1);
+    expect(snapshot?.poll.needsSlackSync).toBe(false);
     expect(slackMessagePublisher.updatedMessages).toHaveLength(1);
   });
 
-  it("continues processing other due polls after one close failure", async () => {
-    const workerClock = {
-      now() {
-        return new Date("2026-03-13T12:00:00.000Z");
-      },
-    };
+  it("continues syncing later polls after an earlier sync failure", async () => {
     const pollStore = new InMemoryPollStore();
 
     await pollStore.createPollWithOptions({
@@ -115,16 +99,24 @@ describe("PollCloseWorker", () => {
         allowOptionAdditions: false,
         allowsMultipleChoices: false,
         allowVoteChanges: true,
-        closesAt: new Date("2026-03-13T11:00:00.000Z"),
+        channelId: "C_FAIL",
         creatorUserId: "U_CREATOR",
         id: "poll_fail",
         isAnonymous: false,
-        question: "Should fail",
+        needsSlackSync: true,
+        question: "Fail sync",
         resultsVisibility: "always_visible",
         sourceType: "slash_command",
+        status: "open",
         workspaceId: "T_1",
       },
     });
+    await pollStore.updateMessageReference("poll_fail", {
+      channelId: "C_FAIL",
+      messageTs: "1",
+    });
+    await pollStore.markSlackSyncState("poll_fail", true);
+
     await pollStore.createPollWithOptions({
       options: [
         {
@@ -146,47 +138,48 @@ describe("PollCloseWorker", () => {
         allowOptionAdditions: false,
         allowsMultipleChoices: false,
         allowVoteChanges: true,
-        closesAt: new Date("2026-03-13T11:30:00.000Z"),
+        channelId: "C_SUCCESS",
         creatorUserId: "U_CREATOR",
         id: "poll_success",
         isAnonymous: false,
-        question: "Should succeed",
+        needsSlackSync: true,
+        question: "Sync success",
         resultsVisibility: "always_visible",
         sourceType: "slash_command",
+        status: "open",
         workspaceId: "T_1",
       },
     });
+    await pollStore.updateMessageReference("poll_success", {
+      channelId: "C_SUCCESS",
+      messageTs: "2",
+    });
+    await pollStore.markSlackSyncState("poll_success", true);
 
     const attemptedPollIds: string[] = [];
-    const worker = new PollCloseWorker({
-      clock: workerClock,
+    const worker = new PollSyncWorker({
       logger: createTestLogger(),
-      pollCloseService: {
-        async closePoll(input: { pollId: string }) {
-          attemptedPollIds.push(input.pollId);
+      pollStore,
+      pollSyncService: {
+        async syncPoll(pollId: string) {
+          attemptedPollIds.push(pollId);
 
-          if (input.pollId === "poll_fail") {
+          if (pollId === "poll_fail") {
             throw new Error("boom");
           }
 
-          await pollStore.closePoll(input.pollId, {
-            closeReason: "scheduled",
-            closedAt: workerClock.now(),
-          });
+          await pollStore.markSlackSyncState(pollId, false);
 
-          return {
-            syncPending: false,
-          };
+          return true;
         },
-      } as unknown as PollCloseService,
-      pollStore,
+      } as unknown as PollSyncService,
     });
 
-    const closedPollCount = await worker.runOnce();
+    const syncedPollCount = await worker.runOnce();
 
-    expect(closedPollCount).toBe(1);
+    expect(syncedPollCount).toBe(1);
     expect(attemptedPollIds).toEqual(["poll_fail", "poll_success"]);
-    expect((await pollStore.findSnapshotById("poll_fail"))?.poll.status).toBe("open");
-    expect((await pollStore.findSnapshotById("poll_success"))?.poll.status).toBe("closed");
+    expect((await pollStore.findSnapshotById("poll_fail"))?.poll.needsSlackSync).toBe(true);
+    expect((await pollStore.findSnapshotById("poll_success"))?.poll.needsSlackSync).toBe(false);
   });
 });

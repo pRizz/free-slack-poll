@@ -141,10 +141,12 @@ export function createApp() {
   });
   const pollCloseWorker = new PollCloseWorker({
     clock: systemClock,
+    logger,
     pollCloseService,
     pollStore,
   });
   const pollSyncWorker = new PollSyncWorker({
+    logger,
     pollStore,
     pollSyncService,
   });
