@@ -32,6 +32,10 @@ export class WorkspaceRepository {
       })
       .returning();
 
+    if (!workspace) {
+      throw new Error("Failed to upsert workspace.");
+    }
+
     return workspace;
   }
 

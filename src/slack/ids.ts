@@ -14,8 +14,8 @@ export const slackViewIds = {
 export const slackActionIds = {
   addOptionRow: "poll_add_option_row",
   closePoll: "poll_close",
-  filterManageablePolls: "poll_home_filter_manageable",
-  filterRecentPolls: "poll_home_filter_recent",
+  homeCreatePoll: "poll_home_create",
+  homeSetFilter: "poll_home_set_filter",
   removeOptionRow: "poll_remove_option_row",
   viewPollDetails: "poll_view_details",
   vote: "poll_vote",

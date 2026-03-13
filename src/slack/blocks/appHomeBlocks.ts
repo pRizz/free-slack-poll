@@ -1,7 +1,7 @@
 import type { KnownBlock } from "@slack/types";
 
 import type { PollRecord } from "../../domain/polls/types.js";
-import { slackActionIds, slackShortcutIds } from "../ids.js";
+import { slackActionIds, slackCommandIds } from "../ids.js";
 
 export interface AppHomeViewModel {
   filter: "open" | "closed";
@@ -27,23 +27,34 @@ export function buildAppHomeBlocks(viewModel: AppHomeViewModel): KnownBlock[] {
       elements: [
         {
           type: "button",
-          action_id: slackActionIds.filterRecentPolls,
+          action_id: slackActionIds.homeCreatePoll,
+          style: "primary",
           text: {
             type: "plain_text",
-            text: `Recent (${viewModel.filter})`,
+            text: "Create poll",
             emoji: true,
           },
-          value: viewModel.filter,
+          value: "create",
         },
         {
           type: "button",
-          action_id: slackActionIds.filterManageablePolls,
+          action_id: slackActionIds.homeSetFilter,
           text: {
             type: "plain_text",
-            text: `Manageable (${viewModel.filter})`,
+            text: "Open",
             emoji: true,
           },
-          value: viewModel.filter,
+          value: "open",
+        },
+        {
+          type: "button",
+          action_id: slackActionIds.homeSetFilter,
+          text: {
+            type: "plain_text",
+            text: "Closed",
+            emoji: true,
+          },
+          value: "closed",
         },
       ],
     },
@@ -51,7 +62,7 @@ export function buildAppHomeBlocks(viewModel: AppHomeViewModel): KnownBlock[] {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `Use the *${slackShortcutIds.createGlobal}* global shortcut or \`${"/poll"}\` to create a new poll.`,
+        text: `Use the \`${slackCommandIds.poll}\` slash command, the global shortcut, or the button above to create a new poll.`,
       },
     },
     {
