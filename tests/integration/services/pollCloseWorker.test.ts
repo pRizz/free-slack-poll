@@ -76,7 +76,10 @@ describe("PollCloseWorker", () => {
       workspaceId: "T_1",
     });
 
-    await postingService.postPoll(createdPoll.pollId, createdPoll.targetConversationId);
+    await postingService.postPoll(
+      createdPoll.pollId,
+      createdPoll.targetConversationId,
+    );
 
     const closedPollCount = await worker.runOnce();
     const snapshot = await pollStore.findSnapshotById(createdPoll.pollId);
@@ -186,7 +189,11 @@ describe("PollCloseWorker", () => {
 
     expect(closedPollCount).toBe(1);
     expect(attemptedPollIds).toEqual(["poll_fail", "poll_success"]);
-    expect((await pollStore.findSnapshotById("poll_fail"))?.poll.status).toBe("open");
-    expect((await pollStore.findSnapshotById("poll_success"))?.poll.status).toBe("closed");
+    expect((await pollStore.findSnapshotById("poll_fail"))?.poll.status).toBe(
+      "open",
+    );
+    expect(
+      (await pollStore.findSnapshotById("poll_success"))?.poll.status,
+    ).toBe("closed");
   });
 });

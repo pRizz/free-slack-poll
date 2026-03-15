@@ -28,7 +28,10 @@ async function main() {
 }
 
 function resolveMigrationDirectory() {
-  return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../drizzle");
+  return path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "../../drizzle",
+  );
 }
 
 async function readMigrationFiles() {

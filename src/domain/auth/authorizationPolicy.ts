@@ -22,7 +22,10 @@ export function canClosePoll(poll: PollRecord, context: AuthorizationContext) {
 /**
  * Returns whether the actor can view detailed voter identities.
  */
-export function canViewDetailedVotes(poll: PollRecord, context: AuthorizationContext) {
+export function canViewDetailedVotes(
+  poll: PollRecord,
+  context: AuthorizationContext,
+) {
   if (poll.isAnonymous) {
     return false;
   }

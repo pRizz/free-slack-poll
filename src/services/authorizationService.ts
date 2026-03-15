@@ -1,4 +1,8 @@
-import { canClosePoll, canManagePoll, canViewDetailedVotes } from "../domain/auth/authorizationPolicy.js";
+import {
+  canClosePoll,
+  canManagePoll,
+  canViewDetailedVotes,
+} from "../domain/auth/authorizationPolicy.js";
 import type { PollRecord } from "../domain/polls/types.js";
 
 export class AuthorizationService {

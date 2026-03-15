@@ -12,11 +12,15 @@ import {
 
 export const slackPollSchema = pgSchema("slack_poll");
 
-export const pollStatusEnum = slackPollSchema.enum("poll_status", ["draft", "open", "closed"]);
-export const pollResultsVisibilityEnum = slackPollSchema.enum("poll_results_visibility", [
-  "always_visible",
-  "hidden_until_closed",
+export const pollStatusEnum = slackPollSchema.enum("poll_status", [
+  "draft",
+  "open",
+  "closed",
 ]);
+export const pollResultsVisibilityEnum = slackPollSchema.enum(
+  "poll_results_visibility",
+  ["always_visible", "hidden_until_closed"],
+);
 export const pollCloseReasonEnum = slackPollSchema.enum("poll_close_reason", [
   "manual",
   "scheduled",
@@ -34,8 +38,12 @@ export const workspaces = slackPollSchema.table("workspaces", {
   teamId: text("team_id").notNull().unique(),
   teamDomain: text("team_domain"),
   teamName: text("team_name"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const polls = slackPollSchema.table(
@@ -53,9 +61,13 @@ export const polls = slackPollSchema.table(
     description: text("description"),
     status: pollStatusEnum("status").notNull().default("draft"),
     isAnonymous: boolean("is_anonymous").notNull().default(false),
-    allowsMultipleChoices: boolean("allows_multiple_choices").notNull().default(false),
+    allowsMultipleChoices: boolean("allows_multiple_choices")
+      .notNull()
+      .default(false),
     allowVoteChanges: boolean("allow_vote_changes").notNull().default(true),
-    allowOptionAdditions: boolean("allow_option_additions").notNull().default(false),
+    allowOptionAdditions: boolean("allow_option_additions")
+      .notNull()
+      .default(false),
     resultsVisibility: pollResultsVisibilityEnum("results_visibility")
       .notNull()
       .default("always_visible"),
@@ -67,17 +79,28 @@ export const polls = slackPollSchema.table(
     sourceChannelId: text("source_channel_id"),
     sourceMessageTs: text("source_message_ts"),
     needsSlackSync: boolean("needs_slack_sync").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
-    index("polls_workspace_status_closes_idx").on(table.workspaceId, table.status, table.closesAt),
+    index("polls_workspace_status_closes_idx").on(
+      table.workspaceId,
+      table.status,
+      table.closesAt,
+    ),
     index("polls_workspace_creator_created_idx").on(
       table.workspaceId,
       table.creatorUserId,
       table.createdAt,
     ),
-    uniqueIndex("polls_channel_message_unique_idx").on(table.channelId, table.messageTs),
+    uniqueIndex("polls_channel_message_unique_idx").on(
+      table.channelId,
+      table.messageTs,
+    ),
   ],
 );
 
@@ -92,10 +115,15 @@ export const pollOptions = slackPollSchema.table(
     text: text("text").notNull(),
     createdByUserId: text("created_by_user_id").notNull(),
     isActive: boolean("is_active").notNull().default(true),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
-    uniqueIndex("poll_options_poll_position_unique_idx").on(table.pollId, table.position),
+    uniqueIndex("poll_options_poll_position_unique_idx").on(
+      table.pollId,
+      table.position,
+    ),
   ],
 );
 
@@ -110,8 +138,12 @@ export const votes = slackPollSchema.table(
       .notNull()
       .references(() => pollOptions.id, { onDelete: "cascade" }),
     voterUserId: text("voter_user_id").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     uniqueIndex("votes_poll_option_voter_unique_idx").on(
@@ -133,10 +165,17 @@ export const pollEvents = slackPollSchema.table(
       .references(() => polls.id, { onDelete: "cascade" }),
     actorUserId: text("actor_user_id"),
     eventType: text("event_type").notNull(),
-    payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    payload: jsonb("payload")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
-  (table) => [index("poll_events_poll_created_idx").on(table.pollId, table.createdAt)],
+  (table) => [
+    index("poll_events_poll_created_idx").on(table.pollId, table.createdAt),
+  ],
 );
 
 export const workspaceRelations = relations(workspaces, ({ many }) => ({

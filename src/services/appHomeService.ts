@@ -1,4 +1,5 @@
 import { appHomeDefaults } from "../config/constants.js";
+import { buildPollSummaryViewModel } from "../domain/polls/pollViewModel.js";
 import { buildAppHomeBlocks } from "../slack/blocks/appHomeBlocks.js";
 import type { HomePublisher, PollStore } from "./ports.js";
 
@@ -38,8 +39,8 @@ export class AppHomeService {
     await this.dependencies.homePublisher.publishHome({
       blocks: buildAppHomeBlocks({
         filter: request.filter,
-        manageablePolls,
-        recentPolls,
+        manageablePolls: manageablePolls.map(buildPollSummaryViewModel),
+        recentPolls: recentPolls.map(buildPollSummaryViewModel),
       }),
       userId: request.userId,
     });

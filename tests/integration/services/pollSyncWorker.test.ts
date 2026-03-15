@@ -64,7 +64,10 @@ describe("PollSyncWorker", () => {
       workspaceId: "T_1",
     });
 
-    await postingService.postPoll(createdPoll.pollId, createdPoll.targetConversationId);
+    await postingService.postPoll(
+      createdPoll.pollId,
+      createdPoll.targetConversationId,
+    );
     await pollStore.markSlackSyncState(createdPoll.pollId, true);
 
     const syncedPollCount = await worker.runOnce();
@@ -179,7 +182,11 @@ describe("PollSyncWorker", () => {
 
     expect(syncedPollCount).toBe(1);
     expect(attemptedPollIds).toEqual(["poll_fail", "poll_success"]);
-    expect((await pollStore.findSnapshotById("poll_fail"))?.poll.needsSlackSync).toBe(true);
-    expect((await pollStore.findSnapshotById("poll_success"))?.poll.needsSlackSync).toBe(false);
+    expect(
+      (await pollStore.findSnapshotById("poll_fail"))?.poll.needsSlackSync,
+    ).toBe(true);
+    expect(
+      (await pollStore.findSnapshotById("poll_success"))?.poll.needsSlackSync,
+    ).toBe(false);
   });
 });

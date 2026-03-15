@@ -61,14 +61,21 @@ describe("core Slack poll flows", () => {
       workspaceId: "T_1",
     });
 
-    await postingService.postPoll(createdPoll.pollId, createdPoll.targetConversationId);
+    await postingService.postPoll(
+      createdPoll.pollId,
+      createdPoll.targetConversationId,
+    );
 
     const snapshot = await pollStore.findSnapshotById(createdPoll.pollId);
     const optionId = snapshot?.options[0]?.id;
 
     expect(optionId).toBeDefined();
 
-    const voteResult = await voteService.castVote(createdPoll.pollId, optionId ?? "", "U_VOTER");
+    const voteResult = await voteService.castVote(
+      createdPoll.pollId,
+      optionId ?? "",
+      "U_VOTER",
+    );
 
     expect(voteResult).toEqual({
       kind: "success",
@@ -77,7 +84,9 @@ describe("core Slack poll flows", () => {
     });
     expect(slackMessagePublisher.postedMessages).toHaveLength(1);
     expect(slackMessagePublisher.updatedMessages).toHaveLength(1);
-    expect(JSON.stringify(slackMessagePublisher.updatedMessages[0]?.blocks)).toContain("1 votes");
+    expect(
+      JSON.stringify(slackMessagePublisher.updatedMessages[0]?.blocks),
+    ).toContain("1 votes");
   });
 
   it("keeps results hidden until close and then reveals them", async () => {
@@ -132,14 +141,19 @@ describe("core Slack poll flows", () => {
       workspaceId: "T_1",
     });
 
-    await postingService.postPoll(createdPoll.pollId, createdPoll.targetConversationId);
+    await postingService.postPoll(
+      createdPoll.pollId,
+      createdPoll.targetConversationId,
+    );
 
     const snapshot = await pollStore.findSnapshotById(createdPoll.pollId);
     const optionId = snapshot?.options[0]?.id ?? "";
 
     await voteService.castVote(createdPoll.pollId, optionId, "U_VOTER");
 
-    expect(JSON.stringify(slackMessagePublisher.updatedMessages[0]?.blocks)).not.toContain("1 votes");
+    expect(
+      JSON.stringify(slackMessagePublisher.updatedMessages[0]?.blocks),
+    ).not.toContain("1 votes");
 
     await closeService.closePoll({
       actorUserId: "U_CREATOR",
@@ -147,6 +161,8 @@ describe("core Slack poll flows", () => {
       pollId: createdPoll.pollId,
     });
 
-    expect(JSON.stringify(slackMessagePublisher.updatedMessages.at(-1)?.blocks)).toContain("1 votes");
+    expect(
+      JSON.stringify(slackMessagePublisher.updatedMessages.at(-1)?.blocks),
+    ).toContain("1 votes");
   });
 });

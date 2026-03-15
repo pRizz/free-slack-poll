@@ -11,9 +11,12 @@ export function buildPollCreateView(
   values: Partial<PollFormValues> = {},
 ): View {
   const showTargetConversationPicker = metadata.sourceConversationId === null;
-  const optionTexts = Array.from({ length: metadata.optionCount }, (_, index) => {
-    return values.optionTexts?.[index] ?? "";
-  });
+  const optionTexts = Array.from(
+    { length: metadata.optionCount },
+    (_, index) => {
+      return values.optionTexts?.[index] ?? "";
+    },
+  );
 
   const blocks: View["blocks"] = [
     {
@@ -56,7 +59,9 @@ export function buildPollCreateView(
         text: "Post in conversation",
         emoji: true,
       },
-      element: createConversationSelectElement(values.targetConversationId ?? null),
+      element: createConversationSelectElement(
+        values.targetConversationId ?? null,
+      ),
     });
   }
 
@@ -72,10 +77,13 @@ export function buildPollCreateView(
       type: "static_select",
       action_id: "value",
       initial_option:
-        values.allowsMultipleChoices ?? false
+        (values.allowsMultipleChoices ?? false)
           ? option("Multiple choice", "multiple")
           : option("Single choice", "single"),
-      options: [option("Single choice", "single"), option("Multiple choice", "multiple")],
+      options: [
+        option("Single choice", "single"),
+        option("Multiple choice", "multiple"),
+      ],
     },
   });
 
@@ -249,12 +257,8 @@ function option(text: string, value: string) {
 }
 
 function createConversationSelectElement(initialConversationId: string | null) {
-  const includedConversationTypes: Array<"public" | "private" | "im" | "mpim"> = [
-    "public",
-    "private",
-    "im",
-    "mpim",
-  ];
+  const includedConversationTypes: Array<"public" | "private" | "im" | "mpim"> =
+    ["public", "private", "im", "mpim"];
 
   return {
     type: "conversations_select" as const,
@@ -262,7 +266,9 @@ function createConversationSelectElement(initialConversationId: string | null) {
     filter: {
       include: includedConversationTypes,
     },
-    ...(initialConversationId !== null ? { initial_conversation: initialConversationId } : {}),
+    ...(initialConversationId !== null
+      ? { initial_conversation: initialConversationId }
+      : {}),
   };
 }
 

@@ -16,7 +16,7 @@ describe("buildPollMessageBlocks", () => {
       type: "section",
     });
     expect(actionBlocks).toHaveLength(1);
-    expect(JSON.stringify(blocks)).toContain("\"action_id\":\"poll_vote\"");
-    expect(JSON.stringify(blocks)).toContain("\"action_id\":\"poll_close\"");
+    expect(JSON.stringify(blocks)).toContain('"action_id":"poll_vote"');
+    expect(JSON.stringify(blocks)).toContain('"action_id":"poll_close"');
   });
 });

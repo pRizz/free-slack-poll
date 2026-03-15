@@ -1,8 +1,15 @@
-import type { PollOptionRecord, PollRecord, PollSnapshot, VoteRecord } from "../../src/domain/polls/types.js";
+import type {
+  PollOptionRecord,
+  PollRecord,
+  PollSnapshot,
+  VoteRecord,
+} from "../../src/domain/polls/types.js";
 
 const now = new Date("2026-03-13T12:00:00.000Z");
 
-export function createPollRecord(overrides: Partial<PollRecord> = {}): PollRecord {
+export function createPollRecord(
+  overrides: Partial<PollRecord> = {},
+): PollRecord {
   return {
     id: "poll_1",
     workspaceId: "workspace_1",
@@ -32,7 +39,9 @@ export function createPollRecord(overrides: Partial<PollRecord> = {}): PollRecor
   };
 }
 
-export function createPollOptions(overrides: Partial<PollOptionRecord>[] = []): PollOptionRecord[] {
+export function createPollOptions(
+  overrides: Partial<PollOptionRecord>[] = [],
+): PollOptionRecord[] {
   const defaults: PollOptionRecord[] = [
     {
       id: "opt_1",
@@ -60,7 +69,9 @@ export function createPollOptions(overrides: Partial<PollOptionRecord>[] = []): 
   }));
 }
 
-export function createVotes(overrides: Partial<VoteRecord>[] = []): VoteRecord[] {
+export function createVotes(
+  overrides: Partial<VoteRecord>[] = [],
+): VoteRecord[] {
   const defaults: VoteRecord[] = [
     {
       id: "vote_1",
@@ -98,11 +109,13 @@ export function createVotes(overrides: Partial<VoteRecord>[] = []): VoteRecord[]
       }));
 }
 
-export function createPollSnapshot(overrides: {
-  options?: Partial<PollOptionRecord>[];
-  poll?: Partial<PollRecord>;
-  votes?: Partial<VoteRecord>[];
-} = {}): PollSnapshot {
+export function createPollSnapshot(
+  overrides: {
+    options?: Partial<PollOptionRecord>[];
+    poll?: Partial<PollRecord>;
+    votes?: Partial<VoteRecord>[];
+  } = {},
+): PollSnapshot {
   return {
     poll: createPollRecord(overrides.poll),
     options: createPollOptions(overrides.options),

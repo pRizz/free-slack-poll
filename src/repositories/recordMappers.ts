@@ -1,5 +1,10 @@
 import type { pollOptions, polls, votes } from "../db/schema.js";
-import type { PollOptionRecord, PollRecord, PollSnapshot, VoteRecord } from "../domain/polls/types.js";
+import type {
+  PollOptionRecord,
+  PollRecord,
+  PollSnapshot,
+  VoteRecord,
+} from "../domain/polls/types.js";
 
 type PollRow = typeof polls.$inferSelect;
 type PollOptionRow = typeof pollOptions.$inferSelect;
@@ -23,7 +28,11 @@ export function toVoteRecord(row: VoteRow): VoteRecord {
   };
 }
 
-export function toPollSnapshot(row: PollRow, options: PollOptionRow[], voteRows: VoteRow[]): PollSnapshot {
+export function toPollSnapshot(
+  row: PollRow,
+  options: PollOptionRow[],
+  voteRows: VoteRow[],
+): PollSnapshot {
   return {
     poll: toPollRecord(row),
     options: options.map(toPollOptionRecord),

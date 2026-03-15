@@ -28,17 +28,34 @@ describe("buildPollMessageViewModel", () => {
 
     expect(viewModel.resultsVisible).toBe(false);
     expect(viewModel.optionItems[0]?.resultText).toBeNull();
-    expect(viewModel.resultsSummaryText).toContain("hidden until the poll closes");
+    expect(viewModel.resultsSummaryText).toContain(
+      "hidden until the poll closes",
+    );
   });
 });
 
 describe("buildPollDetailViewModel", () => {
-  it("lists voter mentions by option", () => {
+  it("includes manager-facing metadata and voter mentions by option", () => {
+    // Arrange
     const snapshot = createPollSnapshot();
 
+    // Act
     const viewModel = buildPollDetailViewModel(snapshot);
+    const createdAtTimestamp = Math.floor(
+      snapshot.poll.createdAt.getTime() / 1000,
+    );
+    const closesAtTimestamp = Math.floor(
+      (snapshot.poll.closesAt ?? new Date()).getTime() / 1000,
+    );
 
+    // Assert
     expect(viewModel.title).toBe("What should we ship next?");
+    expect(viewModel.metadataLines).toEqual([
+      "Created by <@U_CREATOR>",
+      `Created <!date^${createdAtTimestamp}^{date_short_pretty} {time}|${snapshot.poll.createdAt.toISOString()}>`,
+      "Posted in <#C123>",
+      `Closes <!date^${closesAtTimestamp}^{date_short_pretty} {time}|${snapshot.poll.closesAt?.toISOString()}>`,
+    ]);
     expect(viewModel.sections[0]).toEqual({
       heading: "Option A — 1 votes",
       lines: ["<@U_1>"],

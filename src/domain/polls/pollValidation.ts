@@ -27,16 +27,22 @@ export function validateCreatePollInput(
     });
   }
 
-  if (description !== null && description.length > pollLimits.maxDescriptionLength) {
+  if (
+    description !== null &&
+    description.length > pollLimits.maxDescriptionLength
+  ) {
     throw new ValidationError("The poll description is too long.", {
       maxDescriptionLength: pollLimits.maxDescriptionLength,
     });
   }
 
   if (options.length < pollLimits.minOptionCount) {
-    throw new ValidationError("A poll must include at least two answer options.", {
-      minOptionCount: pollLimits.minOptionCount,
-    });
+    throw new ValidationError(
+      "A poll must include at least two answer options.",
+      {
+        minOptionCount: pollLimits.minOptionCount,
+      },
+    );
   }
 
   if (options.length > pollLimits.maxOptionCount) {
@@ -46,7 +52,9 @@ export function validateCreatePollInput(
   }
 
   if (targetConversationId === null) {
-    throw new ValidationError("A target conversation is required before the poll can be posted.");
+    throw new ValidationError(
+      "A target conversation is required before the poll can be posted.",
+    );
   }
 
   const duplicateKey = findDuplicateOptionKey(options);
@@ -57,8 +65,14 @@ export function validateCreatePollInput(
     });
   }
 
-  if (input.closesAt !== null && input.closesAt !== undefined && input.closesAt <= clock.now()) {
-    throw new ValidationError("The scheduled close time must be in the future.");
+  if (
+    input.closesAt !== null &&
+    input.closesAt !== undefined &&
+    input.closesAt <= clock.now()
+  ) {
+    throw new ValidationError(
+      "The scheduled close time must be in the future.",
+    );
   }
 
   return {

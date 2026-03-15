@@ -11,7 +11,8 @@ export function registerPollCommand(app: App) {
     try {
       const trimmedText = body.text.trim();
       const initialQuestion =
-        trimmedText.length > 0 && trimmedText.length <= pollLimits.maxQuestionLength
+        trimmedText.length > 0 &&
+        trimmedText.length <= pollLimits.maxQuestionLength
           ? trimmedText
           : null;
       const initialDescription =

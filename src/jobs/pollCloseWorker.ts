@@ -15,7 +15,10 @@ export class PollCloseWorker {
   constructor(private readonly dependencies: PollCloseWorkerDependencies) {}
 
   async runOnce(limit = 25) {
-    const duePolls = await this.dependencies.pollStore.listDuePolls(this.dependencies.clock.now(), limit);
+    const duePolls = await this.dependencies.pollStore.listDuePolls(
+      this.dependencies.clock.now(),
+      limit,
+    );
     let closedPollCount = 0;
 
     for (const poll of duePolls) {

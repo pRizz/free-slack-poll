@@ -85,7 +85,9 @@ export function buildPollMessageBlocks(
         const baseElement = {
           type: "button" as const,
           action_id:
-            action.key === "close_poll" ? slackActionIds.closePoll : slackActionIds.viewPollDetails,
+            action.key === "close_poll"
+              ? slackActionIds.closePoll
+              : slackActionIds.viewPollDetails,
           text: {
             type: "plain_text" as const,
             text: action.text,
@@ -94,7 +96,9 @@ export function buildPollMessageBlocks(
           value: action.value,
         };
 
-        return action.style !== undefined ? { ...baseElement, style: action.style } : baseElement;
+        return action.style !== undefined
+          ? { ...baseElement, style: action.style }
+          : baseElement;
       }),
     });
   }
@@ -110,5 +114,8 @@ export function encodeOptionVoteValue(pollId: string, optionId: string) {
 }
 
 function escapeMrkdwn(value: string) {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }

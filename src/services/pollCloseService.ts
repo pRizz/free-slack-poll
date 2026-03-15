@@ -3,7 +3,11 @@ import { AuthorizationError, NotFoundError } from "../errors/domainErrors.js";
 import type { Clock } from "../lib/clock.js";
 import type { PollCloseReason } from "../domain/polls/types.js";
 import type { AuthorizationService } from "./authorizationService.js";
-import type { PollEventStore, PollStore, SlackMessagePublisher } from "./ports.js";
+import type {
+  PollEventStore,
+  PollStore,
+  SlackMessagePublisher,
+} from "./ports.js";
 import { renderPollMessage } from "./pollRenderService.js";
 
 export interface PollCloseDependencies {
@@ -24,7 +28,9 @@ export class PollCloseService {
   constructor(private readonly dependencies: PollCloseDependencies) {}
 
   async closePoll(request: ClosePollRequest) {
-    const snapshot = await this.dependencies.pollStore.findSnapshotById(request.pollId);
+    const snapshot = await this.dependencies.pollStore.findSnapshotById(
+      request.pollId,
+    );
 
     if (snapshot === null) {
       throw new NotFoundError("Poll not found.", {
@@ -35,7 +41,10 @@ export class PollCloseService {
     if (
       request.actorUserId !== null &&
       request.actorUserId !== undefined &&
-      !this.dependencies.authorizationService.canClosePoll(snapshot.poll, request.actorUserId)
+      !this.dependencies.authorizationService.canClosePoll(
+        snapshot.poll,
+        request.actorUserId,
+      )
     ) {
       throw new AuthorizationError();
     }
@@ -57,7 +66,9 @@ export class PollCloseService {
       pollId: request.pollId,
     });
 
-    const updatedSnapshot = await this.dependencies.pollStore.findSnapshotById(request.pollId);
+    const updatedSnapshot = await this.dependencies.pollStore.findSnapshotById(
+      request.pollId,
+    );
 
     if (
       updatedSnapshot === null ||
@@ -78,7 +89,10 @@ export class PollCloseService {
         messageTs: updatedSnapshot.poll.messageTs,
         text: renderedMessage.text,
       });
-      await this.dependencies.pollStore.markSlackSyncState(request.pollId, false);
+      await this.dependencies.pollStore.markSlackSyncState(
+        request.pollId,
+        false,
+      );
 
       return {
         syncPending: false,

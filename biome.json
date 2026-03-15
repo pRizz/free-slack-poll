@@ -2,11 +2,7 @@
   "$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!dist",
-      "!coverage"
-    ]
+    "includes": ["**", "!dist", "!coverage"]
   },
   "formatter": {
     "enabled": true,

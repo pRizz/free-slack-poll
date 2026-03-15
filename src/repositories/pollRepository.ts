@@ -1,7 +1,12 @@
 import { and, asc, desc, eq, inArray, lte } from "drizzle-orm";
 
 import { pollOptions, polls } from "../db/schema.js";
-import type { PollCloseReason, PollRecord, PollSnapshot, PollStatus } from "../domain/polls/types.js";
+import type {
+  PollCloseReason,
+  PollRecord,
+  PollSnapshot,
+  PollStatus,
+} from "../domain/polls/types.js";
 import type { DatabaseExecutor } from "./database.js";
 import { toPollRecord, toPollSnapshot } from "./recordMappers.js";
 
@@ -109,9 +114,15 @@ export class PollRepository {
     return toPollSnapshot(result, result.options, result.votes);
   }
 
-  async findSnapshotByMessage(channelId: string, messageTs: string): Promise<PollSnapshot | null> {
+  async findSnapshotByMessage(
+    channelId: string,
+    messageTs: string,
+  ): Promise<PollSnapshot | null> {
     const result = await this.db.query.polls.findFirst({
-      where: and(eq(polls.channelId, channelId), eq(polls.messageTs, messageTs)),
+      where: and(
+        eq(polls.channelId, channelId),
+        eq(polls.messageTs, messageTs),
+      ),
       with: {
         options: {
           orderBy: (table, orderHelpers) => [orderHelpers.asc(table.position)],
@@ -211,7 +222,10 @@ export class PollRepository {
   async listRecentPollsForUser(filters: PollListFilters) {
     const whereClause =
       filters.status === undefined
-        ? and(eq(polls.workspaceId, filters.workspaceId), eq(polls.creatorUserId, filters.userId))
+        ? and(
+            eq(polls.workspaceId, filters.workspaceId),
+            eq(polls.creatorUserId, filters.userId),
+          )
         : and(
             eq(polls.workspaceId, filters.workspaceId),
             eq(polls.creatorUserId, filters.userId),
@@ -228,7 +242,9 @@ export class PollRepository {
     return rows.map(toPollRecord);
   }
 
-  async listManageablePolls(filters: PollListFilters & { adminUserIds: readonly string[] }) {
+  async listManageablePolls(
+    filters: PollListFilters & { adminUserIds: readonly string[] },
+  ) {
     const isAdmin = filters.adminUserIds.includes(filters.userId);
     const baseFilters = [eq(polls.workspaceId, filters.workspaceId)];
 
@@ -283,7 +299,10 @@ export class PollRepository {
       return [];
     }
 
-    const rows = await this.db.select().from(polls).where(inArray(polls.id, pollIds));
+    const rows = await this.db
+      .select()
+      .from(polls)
+      .where(inArray(polls.id, pollIds));
 
     return rows.map(toPollRecord);
   }

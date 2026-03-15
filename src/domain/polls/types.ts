@@ -1,7 +1,11 @@
 export type PollStatus = "draft" | "open" | "closed";
 export type PollResultsVisibility = "always_visible" | "hidden_until_closed";
 export type PollCloseReason = "manual" | "scheduled" | "system";
-export type PollSourceType = "slash_command" | "global_shortcut" | "message_shortcut" | "app_home";
+export type PollSourceType =
+  | "slash_command"
+  | "global_shortcut"
+  | "message_shortcut"
+  | "app_home";
 
 export interface PollRecord {
   id: string;
@@ -125,7 +129,15 @@ export interface PollMessageViewModel {
   resultsVisible: boolean;
 }
 
+export interface PollSummaryViewModel {
+  messagePermalink: string | null;
+  metadataLines: string[];
+  question: string;
+  statusText: string;
+}
+
 export interface PollDetailViewModel {
+  metadataLines: string[];
   title: string;
   sections: Array<{
     heading: string;

@@ -1,5 +1,9 @@
 import { NotFoundError } from "../errors/domainErrors.js";
-import type { PollEventStore, PollStore, SlackMessagePublisher } from "./ports.js";
+import type {
+  PollEventStore,
+  PollStore,
+  SlackMessagePublisher,
+} from "./ports.js";
 import { renderPollMessage } from "./pollRenderService.js";
 
 export interface PollPostingDependencies {
@@ -21,11 +25,12 @@ export class PollPostingService {
     }
 
     const renderedMessage = renderPollMessage(snapshot);
-    const postedMessage = await this.dependencies.slackMessagePublisher.postPollMessage({
-      blocks: renderedMessage.blocks,
-      channelId,
-      text: renderedMessage.text,
-    });
+    const postedMessage =
+      await this.dependencies.slackMessagePublisher.postPollMessage({
+        blocks: renderedMessage.blocks,
+        channelId,
+        text: renderedMessage.text,
+      });
 
     await this.dependencies.pollStore.updateMessageReference(pollId, {
       channelId: postedMessage.channelId,

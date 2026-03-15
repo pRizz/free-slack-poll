@@ -1,12 +1,12 @@
 import type { KnownBlock } from "@slack/types";
 
-import type { PollRecord } from "../../domain/polls/types.js";
+import type { PollSummaryViewModel } from "../../domain/polls/types.js";
 import { slackActionIds, slackCommandIds } from "../ids.js";
 
 export interface AppHomeViewModel {
   filter: "open" | "closed";
-  manageablePolls: PollRecord[];
-  recentPolls: PollRecord[];
+  manageablePolls: PollSummaryViewModel[];
+  recentPolls: PollSummaryViewModel[];
 }
 
 /**
@@ -99,7 +99,7 @@ export function buildAppHomeBlocks(viewModel: AppHomeViewModel): KnownBlock[] {
 }
 
 function buildPollSummaryBlocks(
-  polls: PollRecord[],
+  polls: PollSummaryViewModel[],
   emptyMessage: string,
 ): KnownBlock[] {
   if (polls.length === 0) {
@@ -121,7 +121,8 @@ function buildPollSummaryBlocks(
         type: "mrkdwn" as const,
         text: [
           `*${poll.question}*`,
-          `Status: ${poll.status}`,
+          ...poll.metadataLines,
+          `Status: ${poll.statusText}`,
           poll.messagePermalink !== null
             ? `<${poll.messagePermalink}|Open poll message>`
             : null,

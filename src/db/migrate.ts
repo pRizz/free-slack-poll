@@ -48,9 +48,10 @@ async function main() {
 
         await client.query("BEGIN");
         await client.query(migrationSql);
-        await client.query("INSERT INTO slack_poll.schema_migrations (name) VALUES ($1)", [
-          filename,
-        ]);
+        await client.query(
+          "INSERT INTO slack_poll.schema_migrations (name) VALUES ($1)",
+          [filename],
+        );
         await client.query("COMMIT");
 
         logger.info({ migration: filename }, "Applied database migration.");

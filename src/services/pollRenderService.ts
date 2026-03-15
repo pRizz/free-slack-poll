@@ -16,7 +16,9 @@ export interface RenderedSlackMessage {
 /**
  * Renders the poll message for a shared channel message.
  */
-export function renderPollMessage(snapshot: PollSnapshot): RenderedSlackMessage {
+export function renderPollMessage(
+  snapshot: PollSnapshot,
+): RenderedSlackMessage {
   const viewModel = buildPollMessageViewModel(snapshot);
 
   return {
@@ -28,7 +30,9 @@ export function renderPollMessage(snapshot: PollSnapshot): RenderedSlackMessage 
 /**
  * Renders the detailed non-anonymous results view.
  */
-export function renderPollDetailMessage(snapshot: PollSnapshot): RenderedSlackMessage {
+export function renderPollDetailMessage(
+  snapshot: PollSnapshot,
+): RenderedSlackMessage {
   const viewModel = buildPollDetailViewModel(snapshot);
 
   return {

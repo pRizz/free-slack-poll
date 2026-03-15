@@ -13,12 +13,15 @@ export class PollSyncWorker {
   constructor(private readonly dependencies: PollSyncWorkerDependencies) {}
 
   async runOnce(limit = 25) {
-    const pollsNeedingSync = await this.dependencies.pollStore.listPollsNeedingSlackSync(limit);
+    const pollsNeedingSync =
+      await this.dependencies.pollStore.listPollsNeedingSlackSync(limit);
     let syncedPollCount = 0;
 
     for (const poll of pollsNeedingSync) {
       try {
-        const synced = await this.dependencies.pollSyncService.syncPoll(poll.id);
+        const synced = await this.dependencies.pollSyncService.syncPoll(
+          poll.id,
+        );
 
         if (synced) {
           syncedPollCount += 1;

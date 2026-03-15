@@ -1,6 +1,14 @@
-import { applyVoteRules, type VoteMutationResult } from "../domain/votes/voteRules.js";
+import {
+  applyVoteRules,
+  type VoteMutationResult,
+} from "../domain/votes/voteRules.js";
 import { NotFoundError } from "../errors/domainErrors.js";
-import type { PollEventStore, PollStore, SlackMessagePublisher, VoteStore } from "./ports.js";
+import type {
+  PollEventStore,
+  PollStore,
+  SlackMessagePublisher,
+  VoteStore,
+} from "./ports.js";
 import { renderPollMessage } from "./pollRenderService.js";
 
 export interface VoteServiceDependencies {
@@ -25,7 +33,11 @@ export type VoteServiceResult =
 export class VoteService {
   constructor(private readonly dependencies: VoteServiceDependencies) {}
 
-  async castVote(pollId: string, optionId: string, voterUserId: string): Promise<VoteServiceResult> {
+  async castVote(
+    pollId: string,
+    optionId: string,
+    voterUserId: string,
+  ): Promise<VoteServiceResult> {
     const snapshot = await this.dependencies.pollStore.findSnapshotById(pollId);
 
     if (snapshot === null) {
@@ -34,15 +46,18 @@ export class VoteService {
       });
     }
 
-    const currentVotes = await this.dependencies.voteStore.listVotesForPollAndUser(
-      pollId,
-      voterUserId,
-    );
+    const currentVotes =
+      await this.dependencies.voteStore.listVotesForPollAndUser(
+        pollId,
+        voterUserId,
+      );
     const voteResult = applyVoteRules({
       currentOptionIds: currentVotes.map((vote) => vote.pollOptionId),
       optionId,
       poll: snapshot.poll,
-      validOptionIds: snapshot.options.filter((option) => option.isActive).map((option) => option.id),
+      validOptionIds: snapshot.options
+        .filter((option) => option.isActive)
+        .map((option) => option.id),
     });
 
     if (voteResult.kind === "error") {
@@ -66,7 +81,8 @@ export class VoteService {
       pollId,
     });
 
-    const updatedSnapshot = await this.dependencies.pollStore.findSnapshotById(pollId);
+    const updatedSnapshot =
+      await this.dependencies.pollStore.findSnapshotById(pollId);
 
     if (
       updatedSnapshot === null ||
@@ -106,7 +122,9 @@ export class VoteService {
   }
 }
 
-function deriveVoteEventType(result: Extract<VoteMutationResult, { kind: "success" }>) {
+function deriveVoteEventType(
+  result: Extract<VoteMutationResult, { kind: "success" }>,
+) {
   if (result.addedOptionIds.length > 0 && result.removedOptionIds.length > 0) {
     return "vote_changed";
   }

@@ -15,7 +15,11 @@ import type {
 } from "../domain/polls/types.js";
 
 export interface WorkspaceStore {
-  upsertWorkspace(input: { teamDomain?: string | null; teamId: string; teamName?: string | null }): Promise<{
+  upsertWorkspace(input: {
+    teamDomain?: string | null;
+    teamId: string;
+    teamName?: string | null;
+  }): Promise<{
     id: string;
     teamDomain: string | null;
     teamId: string;
@@ -39,15 +43,25 @@ export interface PollStore {
   }): Promise<PollRecord>;
   findByIds(pollIds: string[]): Promise<PollRecord[]>;
   findSnapshotById(pollId: string): Promise<PollSnapshot | null>;
-  findSnapshotByMessage(channelId: string, messageTs: string): Promise<PollSnapshot | null>;
+  findSnapshotByMessage(
+    channelId: string,
+    messageTs: string,
+  ): Promise<PollSnapshot | null>;
   listDuePolls(now: Date, limit: number): Promise<PollRecord[]>;
   listManageablePolls(
     filters: PollListFilters & { adminUserIds: readonly string[] },
   ): Promise<PollRecord[]>;
   listPollsNeedingSlackSync(limit: number): Promise<PollRecord[]>;
   listRecentPollsForUser(filters: PollListFilters): Promise<PollRecord[]>;
-  listOptions(pollId: string): Promise<Array<{ id: string; pollId: string; position: number; text: string }>>;
-  markSlackSyncState(pollId: string, needsSlackSync: boolean): Promise<PollRecord | null>;
+  listOptions(
+    pollId: string,
+  ): Promise<
+    Array<{ id: string; pollId: string; position: number; text: string }>
+  >;
+  markSlackSyncState(
+    pollId: string,
+    needsSlackSync: boolean,
+  ): Promise<PollRecord | null>;
   updateMessageReference(
     pollId: string,
     input: {
@@ -66,7 +80,10 @@ export interface VoteStore {
     voterUserId: string;
   }): Promise<void>;
   listVotesForPoll(pollId: string): Promise<VoteRecord[]>;
-  listVotesForPollAndUser(pollId: string, voterUserId: string): Promise<VoteRecord[]>;
+  listVotesForPollAndUser(
+    pollId: string,
+    voterUserId: string,
+  ): Promise<VoteRecord[]>;
 }
 
 export interface PollEventStore {

@@ -1,6 +1,11 @@
 import type { KnownBlock } from "@slack/types";
 
-import type { PollCloseReason, PollRecord, PollSnapshot, VoteRecord } from "../../src/domain/polls/types.js";
+import type {
+  PollCloseReason,
+  PollRecord,
+  PollSnapshot,
+  VoteRecord,
+} from "../../src/domain/polls/types.js";
 import type {
   HomePublisher,
   IdGenerator,
@@ -23,7 +28,11 @@ type PollOptionRecord = PollSnapshot["options"][number];
 export class InMemoryWorkspaceStore implements WorkspaceStore {
   public readonly workspaces = new Map<string, WorkspaceRecord>();
 
-  async upsertWorkspace(input: { teamDomain?: string | null; teamId: string; teamName?: string | null }) {
+  async upsertWorkspace(input: {
+    teamDomain?: string | null;
+    teamId: string;
+    teamName?: string | null;
+  }) {
     const workspace: WorkspaceRecord = {
       id: input.teamId,
       teamDomain: input.teamDomain ?? null,
@@ -42,14 +51,16 @@ export class InMemoryPollStore implements PollStore {
   public readonly polls = new Map<string, PollRecord>();
   public readonly votes = new Map<string, VoteRecord>();
 
-  async addOptions(options: Array<{
-    createdByUserId: string;
-    id: string;
-    isActive?: boolean;
-    pollId: string;
-    position: number;
-    text: string;
-  }>) {
+  async addOptions(
+    options: Array<{
+      createdByUserId: string;
+      id: string;
+      isActive?: boolean;
+      pollId: string;
+      position: number;
+      text: string;
+    }>,
+  ) {
     const createdOptions = options.map((option) => {
       const createdOption: PollOptionRecord = {
         createdAt: new Date(),
@@ -179,13 +190,17 @@ export class InMemoryPollStore implements PollStore {
       options: Array.from(this.options.values())
         .filter((option) => option.pollId === pollId)
         .sort((left, right) => left.position - right.position),
-      votes: Array.from(this.votes.values()).filter((vote) => vote.pollId === pollId),
+      votes: Array.from(this.votes.values()).filter(
+        (vote) => vote.pollId === pollId,
+      ),
     };
   }
 
   async findSnapshotByMessage(channelId: string, messageTs: string) {
     const poll = Array.from(this.polls.values()).find(
-      (pollRecord) => pollRecord.channelId === channelId && pollRecord.messageTs === messageTs,
+      (pollRecord) =>
+        pollRecord.channelId === channelId &&
+        pollRecord.messageTs === messageTs,
     );
 
     return poll ? this.findSnapshotById(poll.id) : null;
@@ -193,7 +208,12 @@ export class InMemoryPollStore implements PollStore {
 
   async listDuePolls(now: Date, limit: number) {
     return Array.from(this.polls.values())
-      .filter((poll) => poll.status === "open" && poll.closesAt !== null && poll.closesAt <= now)
+      .filter(
+        (poll) =>
+          poll.status === "open" &&
+          poll.closesAt !== null &&
+          poll.closesAt <= now,
+      )
       .sort((left, right) => {
         if (left.closesAt === null || right.closesAt === null) {
           return 0;
@@ -215,9 +235,15 @@ export class InMemoryPollStore implements PollStore {
 
     return Array.from(this.polls.values())
       .filter((poll) => poll.workspaceId === filters.workspaceId)
-      .filter((poll) => (isAdmin ? true : poll.creatorUserId === filters.userId))
-      .filter((poll) => (filters.status ? poll.status === filters.status : true))
-      .sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime())
+      .filter((poll) =>
+        isAdmin ? true : poll.creatorUserId === filters.userId,
+      )
+      .filter((poll) =>
+        filters.status ? poll.status === filters.status : true,
+      )
+      .sort(
+        (left, right) => right.updatedAt.getTime() - left.updatedAt.getTime(),
+      )
       .slice(0, filters.limit);
   }
 
@@ -236,7 +262,9 @@ export class InMemoryPollStore implements PollStore {
   async listPollsNeedingSlackSync(limit: number) {
     return Array.from(this.polls.values())
       .filter((poll) => poll.needsSlackSync)
-      .sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime())
+      .sort(
+        (left, right) => right.updatedAt.getTime() - left.updatedAt.getTime(),
+      )
       .slice(0, limit);
   }
 
@@ -248,10 +276,16 @@ export class InMemoryPollStore implements PollStore {
   }) {
     return Array.from(this.polls.values())
       .filter(
-        (poll) => poll.workspaceId === filters.workspaceId && poll.creatorUserId === filters.userId,
+        (poll) =>
+          poll.workspaceId === filters.workspaceId &&
+          poll.creatorUserId === filters.userId,
       )
-      .filter((poll) => (filters.status ? poll.status === filters.status : true))
-      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+      .filter((poll) =>
+        filters.status ? poll.status === filters.status : true,
+      )
+      .sort(
+        (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
+      )
       .slice(0, filters.limit);
   }
 
@@ -347,7 +381,9 @@ export class InMemoryVoteStore implements VoteStore {
   }
 
   async listVotesForPoll(pollId: string) {
-    return Array.from(this.pollStore.votes.values()).filter((vote) => vote.pollId === pollId);
+    return Array.from(this.pollStore.votes.values()).filter(
+      (vote) => vote.pollId === pollId,
+    );
   }
 
   async listVotesForPollAndUser(pollId: string, voterUserId: string) {
@@ -391,7 +427,11 @@ export class InMemorySlackMessagePublisher implements SlackMessagePublisher {
     text: string;
   }> = [];
 
-  async postPollMessage(input: { blocks: KnownBlock[]; channelId: string; text: string }) {
+  async postPollMessage(input: {
+    blocks: KnownBlock[];
+    channelId: string;
+    text: string;
+  }) {
     this.postedMessages.push(input);
 
     return {
@@ -416,7 +456,10 @@ export class InMemorySlackMessagePublisher implements SlackMessagePublisher {
 }
 
 export class InMemoryHomePublisher implements HomePublisher {
-  public readonly publishedHomes: Array<{ blocks: KnownBlock[]; userId: string }> = [];
+  public readonly publishedHomes: Array<{
+    blocks: KnownBlock[];
+    userId: string;
+  }> = [];
 
   async publishHome(input: { blocks: KnownBlock[]; userId: string }) {
     this.publishedHomes.push(input);

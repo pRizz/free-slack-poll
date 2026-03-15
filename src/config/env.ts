@@ -38,7 +38,9 @@ export function loadEnv(environment: NodeJS.ProcessEnv = process.env) {
     databaseUrl: parsedEnvironment.DATABASE_URL,
     defaultTimezone: parsedEnvironment.DEFAULT_TIMEZONE,
     logLevel: parsedEnvironment.LOG_LEVEL,
-    pollAdminUserIds: splitCommaSeparatedValues(parsedEnvironment.POLL_ADMIN_USER_IDS),
+    pollAdminUserIds: splitCommaSeparatedValues(
+      parsedEnvironment.POLL_ADMIN_USER_IDS,
+    ),
     pollCloseIntervalSeconds: parsedEnvironment.POLL_CLOSE_INTERVAL_SECONDS,
     pollSyncIntervalSeconds: parsedEnvironment.POLL_SYNC_INTERVAL_SECONDS,
     slackAppToken: parsedEnvironment.SLACK_APP_TOKEN,

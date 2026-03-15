@@ -1,5 +1,25 @@
 # Todo
 
+## Poll Metadata UI
+
+- [x] Surface creator and distinguishing metadata in App Home summaries.
+- [x] Add a matching metadata section to the poll details modal.
+- [x] Verify unit, integration, lint, typecheck, and build coverage for the UI change.
+
+## Poll Metadata Verification
+
+- [x] `bun run test`
+- [x] `bun run lint`
+- [x] `bun run typecheck`
+- [x] `bun run build`
+
+## Poll Metadata Completion Review
+
+- App Home now shows creator, created time, target channel, and close timing metadata through a dedicated summary view model instead of rendering directly from raw poll records.
+- The poll details modal now includes a metadata section ahead of the per-option voter breakdown, using the same Slack mention and date formatting helpers.
+- Added unit coverage for App Home metadata rendering and detail metadata, plus an integration check for an admin managing another user's poll.
+- Residual risk: App Home still shows Slack IDs as native mentions, so the final display remains dependent on Slack resolving those mentions in the client.
+
 - [x] Add Railway config-as-code for Dockerfile builds and worker startup.
 - [x] Update the Railway deployment guide with repo-vs-dashboard ownership and `main` autodeploy instructions.
 - [x] Verify local build and container-oriented deployment checks.

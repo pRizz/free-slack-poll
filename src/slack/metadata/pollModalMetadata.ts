@@ -14,7 +14,9 @@ export function encodePollModalMetadata(metadata: PollModalMetadata) {
   return JSON.stringify(metadata);
 }
 
-export function decodePollModalMetadata(maybeValue: string | undefined): PollModalMetadata {
+export function decodePollModalMetadata(
+  maybeValue: string | undefined,
+): PollModalMetadata {
   if (!maybeValue) {
     throw new Error("Poll modal metadata is missing.");
   }
@@ -31,14 +33,22 @@ export function decodePollModalMetadata(maybeValue: string | undefined): PollMod
 
   return {
     initialDescription:
-      typeof parsedValue.initialDescription === "string" ? parsedValue.initialDescription : null,
+      typeof parsedValue.initialDescription === "string"
+        ? parsedValue.initialDescription
+        : null,
     initialQuestion:
-      typeof parsedValue.initialQuestion === "string" ? parsedValue.initialQuestion : null,
+      typeof parsedValue.initialQuestion === "string"
+        ? parsedValue.initialQuestion
+        : null,
     optionCount: parsedValue.optionCount,
     sourceConversationId:
-      typeof parsedValue.sourceConversationId === "string" ? parsedValue.sourceConversationId : null,
+      typeof parsedValue.sourceConversationId === "string"
+        ? parsedValue.sourceConversationId
+        : null,
     sourceMessageTs:
-      typeof parsedValue.sourceMessageTs === "string" ? parsedValue.sourceMessageTs : null,
+      typeof parsedValue.sourceMessageTs === "string"
+        ? parsedValue.sourceMessageTs
+        : null,
     sourceType: parsedValue.sourceType as PollSourceType,
     teamId: parsedValue.teamId,
   };

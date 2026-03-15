@@ -22,7 +22,10 @@ export type VoteMutationResult =
 export interface ApplyVoteRulesInput {
   currentOptionIds: string[];
   optionId: string;
-  poll: Pick<PollRecord, "allowVoteChanges" | "allowsMultipleChoices" | "status">;
+  poll: Pick<
+    PollRecord,
+    "allowVoteChanges" | "allowsMultipleChoices" | "status"
+  >;
   validOptionIds: readonly string[];
 }
 

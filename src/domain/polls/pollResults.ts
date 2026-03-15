@@ -1,4 +1,8 @@
-import type { AggregatedPollResults, PollOptionRecord, VoteRecord } from "./types.js";
+import type {
+  AggregatedPollResults,
+  PollOptionRecord,
+  VoteRecord,
+} from "./types.js";
 
 /**
  * Computes aggregate poll results from option and vote records.

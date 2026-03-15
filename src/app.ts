@@ -177,7 +177,8 @@ export function createApp() {
  * Starts the Slack application.
  */
 export async function main() {
-  const { app, closeWorkers, env, logger, pollCloseWorker, pollSyncWorker } = createApp();
+  const { app, closeWorkers, env, logger, pollCloseWorker, pollSyncWorker } =
+    createApp();
   const closePollInterval = setInterval(() => {
     void pollCloseWorker.runOnce().catch((error) => {
       logger.error({ err: error }, "Poll close worker failed.");
@@ -204,7 +205,8 @@ export async function main() {
 
 const entryFilePath = process.argv[1];
 const isEntryPoint =
-  entryFilePath !== undefined && import.meta.url === pathToFileURL(entryFilePath).href;
+  entryFilePath !== undefined &&
+  import.meta.url === pathToFileURL(entryFilePath).href;
 
 if (isEntryPoint) {
   main().catch((error) => {

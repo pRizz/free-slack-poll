@@ -1,18 +1,34 @@
 import { aggregatePollResults } from "./pollResults.js";
-import type { PollDetailViewModel, PollMessageViewModel, PollSnapshot } from "./types.js";
+import {
+  formatSlackChannelMention,
+  formatSlackDate,
+  formatSlackUserMention,
+} from "../../slack/formatting.js";
+import type {
+  PollDetailViewModel,
+  PollMessageViewModel,
+  PollRecord,
+  PollSnapshot,
+  PollSummaryViewModel,
+} from "./types.js";
 
 /**
  * Builds a render-friendly poll message view model from authoritative poll state.
  */
-export function buildPollMessageViewModel(snapshot: PollSnapshot): PollMessageViewModel {
+export function buildPollMessageViewModel(
+  snapshot: PollSnapshot,
+): PollMessageViewModel {
   const results = aggregatePollResults(snapshot.options, snapshot.votes);
   const resultsVisible =
-    snapshot.poll.resultsVisibility === "always_visible" || snapshot.poll.status === "closed";
+    snapshot.poll.resultsVisibility === "always_visible" ||
+    snapshot.poll.status === "closed";
 
   const metadataLines = [
     snapshot.poll.isAnonymous ? "Anonymous poll" : "Named poll",
     snapshot.poll.allowsMultipleChoices ? "Multiple choice" : "Single choice",
-    snapshot.poll.allowVoteChanges ? "Vote changes allowed" : "Vote changes disabled",
+    snapshot.poll.allowVoteChanges
+      ? "Vote changes allowed"
+      : "Vote changes disabled",
   ];
 
   if (snapshot.poll.closesAt !== null) {
@@ -61,12 +77,29 @@ export function buildPollMessageViewModel(snapshot: PollSnapshot): PollMessageVi
 }
 
 /**
+ * Builds a compact summary model for manager-facing poll lists.
+ */
+export function buildPollSummaryViewModel(
+  poll: PollRecord,
+): PollSummaryViewModel {
+  return {
+    messagePermalink: poll.messagePermalink,
+    metadataLines: buildManagerMetadataLines(poll),
+    question: poll.question,
+    statusText: poll.status,
+  };
+}
+
+/**
  * Builds a detailed voter-results view model for non-anonymous polls.
  */
-export function buildPollDetailViewModel(snapshot: PollSnapshot): PollDetailViewModel {
+export function buildPollDetailViewModel(
+  snapshot: PollSnapshot,
+): PollDetailViewModel {
   const results = aggregatePollResults(snapshot.options, snapshot.votes);
 
   return {
+    metadataLines: buildManagerMetadataLines(snapshot.poll),
     title: snapshot.poll.question,
     sections: results.optionResults.map((optionResult) => ({
       heading: `${optionResult.label} — ${optionResult.voteCount} votes`,
@@ -78,14 +111,32 @@ export function buildPollDetailViewModel(snapshot: PollSnapshot): PollDetailView
   };
 }
 
-function formatResultsSummary(totalVoteCount: number, uniqueVoterCount: number) {
+function formatResultsSummary(
+  totalVoteCount: number,
+  uniqueVoterCount: number,
+) {
   return `${totalVoteCount} votes from ${uniqueVoterCount} participant${
     uniqueVoterCount === 1 ? "" : "s"
   }`;
 }
 
-function formatSlackDate(value: Date) {
-  const unixTimestamp = Math.floor(value.getTime() / 1000);
+function buildManagerMetadataLines(poll: PollRecord) {
+  const metadataLines = [
+    `Created by ${formatSlackUserMention(poll.creatorUserId)}`,
+    `Created ${formatSlackDate(poll.createdAt)}`,
+  ];
 
-  return `<!date^${unixTimestamp}^{date_short_pretty} {time}|${value.toISOString()}>`;
+  if (poll.channelId !== null) {
+    metadataLines.push(
+      `Posted in ${formatSlackChannelMention(poll.channelId)}`,
+    );
+  }
+
+  if (poll.status === "open" && poll.closesAt !== null) {
+    metadataLines.push(`Closes ${formatSlackDate(poll.closesAt)}`);
+  } else if (poll.status === "closed" && poll.closedAt !== null) {
+    metadataLines.push(`Closed ${formatSlackDate(poll.closedAt)}`);
+  }
+
+  return metadataLines;
 }

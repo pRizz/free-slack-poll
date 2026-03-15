@@ -29,7 +29,10 @@ export interface SlackHandlerDependencies {
 /**
  * Registers Slack handlers on the Bolt app instance.
  */
-export function registerHandlers(app: App, dependencies: SlackHandlerDependencies) {
+export function registerHandlers(
+  app: App,
+  dependencies: SlackHandlerDependencies,
+) {
   registerPollCommand(app);
   registerGlobalNewPollShortcut(app);
   registerMessageCreatePollShortcut(app);

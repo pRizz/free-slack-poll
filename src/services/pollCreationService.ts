@@ -22,7 +22,9 @@ export class PollCreationService {
     }
 
     await this.dependencies.workspaceStore.upsertWorkspace({
-      ...(request.teamDomain !== undefined ? { teamDomain: request.teamDomain } : {}),
+      ...(request.teamDomain !== undefined
+        ? { teamDomain: request.teamDomain }
+        : {}),
       teamId: request.teamId,
       ...(request.teamName !== undefined ? { teamName: request.teamName } : {}),
     });

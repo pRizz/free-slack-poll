@@ -1,7 +1,10 @@
 import { AppError } from "./appError.js";
 
 export class ValidationError extends AppError {
-  constructor(message: string, metadata: Record<string, string | number | boolean> = {}) {
+  constructor(
+    message: string,
+    metadata: Record<string, string | number | boolean> = {},
+  ) {
     super("VALIDATION_ERROR", message, metadata);
   }
 }
@@ -13,13 +16,19 @@ export class AuthorizationError extends AppError {
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string, metadata: Record<string, string | number | boolean> = {}) {
+  constructor(
+    message: string,
+    metadata: Record<string, string | number | boolean> = {},
+  ) {
     super("NOT_FOUND", message, metadata);
   }
 }
 
 export class ConflictError extends AppError {
-  constructor(message: string, metadata: Record<string, string | number | boolean> = {}) {
+  constructor(
+    message: string,
+    metadata: Record<string, string | number | boolean> = {},
+  ) {
     super("CONFLICT", message, metadata);
   }
 }
