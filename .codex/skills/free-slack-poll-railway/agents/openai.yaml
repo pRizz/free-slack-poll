@@ -1,0 +1,4 @@
+interface:
+  display_name: "Railway Deploy"
+  short_description: "Bootstrap and manually deploy free-slack-poll with Railway CLI"
+  default_prompt: "Use the free-slack-poll Railway helper to diagnose, bootstrap, deploy, or troubleshoot this repo safely."
