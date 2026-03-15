@@ -23,7 +23,13 @@
     "docker:build": "docker build -t free-slack-poll:local .",
     "docker:smoke": "./scripts/docker-smoke.sh docker",
     "compose:config": "docker compose --env-file .env.compose.example config",
-    "compose:smoke": "./scripts/docker-smoke.sh compose"
+    "compose:smoke": "./scripts/docker-smoke.sh compose",
+    "railway:doctor": "./scripts/railway-assist.sh doctor",
+    "railway:bootstrap": "./scripts/railway-assist.sh bootstrap",
+    "railway:deploy": "./scripts/railway-assist.sh deploy",
+    "railway:status": "./scripts/railway-assist.sh status",
+    "railway:logs": "./scripts/railway-assist.sh logs",
+    "railway:vars:push": "./scripts/railway-assist.sh vars-push"
   },
   "dependencies": {
     "@slack/bolt": "^4.6.0",

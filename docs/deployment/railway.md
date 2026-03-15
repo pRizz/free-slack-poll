@@ -97,6 +97,30 @@ bun run compose:config
 bun run compose:smoke
 ```
 
+If you want CLI help for first-time local setup or ongoing manual deployments, this repository also includes:
+
+```bash
+bun run railway:doctor
+bun run railway:bootstrap
+bun run railway:deploy
+bun run railway:status
+bun run railway:logs
+```
+
+Those commands wrap `scripts/railway-assist.sh` and are intended for:
+
+- linking this repo to an existing Railway project, environment, and service
+- staging repo-specific variables from a dedicated env file
+- running manual `railway up` deploys with optional local verification
+- checking service status, logs, redeploys, and restarts during manual operations
+
+They do **not** replace dashboard-only work such as:
+
+- connecting the GitHub repository for autodeploys
+- enabling `Wait for CI`
+- provisioning the first Postgres service if you prefer the dashboard flow
+- reviewing staged environment changes before you intentionally deploy them
+
 ## Step 1: Create a Railway project
 
 1. Open Railway and create a new project.
@@ -167,6 +191,18 @@ Why this matters:
 
 - the app validates these variables at startup
 - a missing required variable will cause the container to fail before the worker is usable
+
+### Optional CLI variable sync
+
+If you keep a local Railway-specific env file, for example `.env.railway`, you can stage the repo-relevant variables with:
+
+```bash
+bun run railway:vars:push -- --env-file .env.railway
+```
+
+This helper intentionally skips `DATABASE_URL` unless you explicitly opt in, because copying a local development database URL into Railway is usually wrong.
+
+Use `.env.railway.example` as the template for that file.
 
 ## Step 5: Confirm the pre-deploy migration command from `railway.json`
 
@@ -242,6 +278,14 @@ The expected high-level sequence is:
 1. Railway builds the Docker image
 2. Railway runs `node dist/db/migrate.js`
 3. Railway starts the service with `node dist/app.js`
+
+If you want to trigger that deployment from the CLI for a linked local checkout, use:
+
+```bash
+bun run railway:deploy -- --verify=full
+```
+
+That command runs the repository helper, performs local verification, then calls `railway up`.
 
 After that first successful deployment:
 

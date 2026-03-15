@@ -360,7 +360,22 @@ bun run docker:build
 bun run docker:smoke
 bun run compose:config
 bun run compose:smoke
+bun run railway:doctor
+bun run railway:bootstrap
+bun run railway:deploy
+bun run railway:status
+bun run railway:logs
+bun run railway:vars:push
 ```
+
+Railway CLI helpers:
+
+- `bun run railway:doctor` checks Railway CLI install/auth/link status for this repo.
+- `bun run railway:bootstrap -- --project <project> --environment production --service <service>` links the repo to an existing Railway target and can push variables from an explicit env file.
+- `bun run railway:deploy -- --verify=full` runs the helper's Railway deployment workflow for this repo.
+- `bun run railway:vars:push -- --env-file .env.railway` stages repo variables in Railway without triggering a deploy.
+
+The helper script lives at `scripts/railway-assist.sh`. Use `.env.railway.example` as the starting point for a local Railway-specific env file.
 
 ## Testing
 
