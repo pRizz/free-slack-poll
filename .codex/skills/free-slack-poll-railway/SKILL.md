@@ -25,6 +25,7 @@ Use this skill only when the current workspace is the `free-slack-poll` reposito
    - If it does not exist yet, use `--create-project --project <name> --workspace <workspace>`.
 5. For manual deployments, use `./scripts/railway-assist.sh deploy`.
 6. For status and troubleshooting, use `status`, `logs`, `redeploy`, or `restart` through the helper.
+   - On a healthy first deploy, expect the logs to show the pre-deploy migration container starting and stopping before the long-running worker logs `Slack poll app started in Socket Mode.`
 7. If Railway bootstrap is blocked on missing Slack secrets, load `references/slack-tokens.md` and give the user the recommended Slack app/token path for this repo before asking for credentials.
    - Be explicit that Slack's Socket Mode examples often only require `xoxb` + `xapp`, but this repo currently also validates and passes `SLACK_SIGNING_SECRET`, so the user should gather all three values.
 8. If the user wants to keep deployment secrets in local gitignored env files or push them to Railway, load `references/local-env-sync.md`.
