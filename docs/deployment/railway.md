@@ -33,6 +33,46 @@ That mapping preserves the important sequence:
 2. run migrations
 3. start the Slack worker
 
+## What is configured in code vs in Railway
+
+This repository now checks in a root `railway.json` that defines the per-deployment build and runtime behavior Railway should use:
+
+```json
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE"
+  },
+  "deploy": {
+    "preDeployCommand": ["node dist/db/migrate.js"],
+    "startCommand": "node dist/app.js",
+    "restartPolicyType": "ALWAYS"
+  }
+}
+```
+
+Treat that file as the source of truth for:
+
+- building from the checked-in `Dockerfile`
+- running migrations before each deployment
+- starting the long-running Socket Mode worker
+- restarting the worker if it crashes
+
+Keep the following in the Railway dashboard:
+
+- the GitHub repository connection
+- the deployment trigger branch (`main`)
+- the `Wait for CI` toggle
+- the PostgreSQL service
+- environment variables and secrets
+- networking choices such as leaving public ingress and HTTP healthchecks unset
+
+Why this split matters:
+
+- config-as-code keeps the build and worker command behavior versioned with the application
+- the Railway dashboard still owns project-level integrations and secrets
+- Railway config files override dashboard deploy settings for each deployment, but do not rewrite the dashboard values
+
 ## Before you start
 
 Have the following ready:
@@ -67,6 +107,7 @@ Why this matters:
 
 - the project root contains the production `Dockerfile`
 - the `Dockerfile` already compiles the app and sets the default runtime command to `node dist/app.js`
+- the checked-in `railway.json` tells Railway to deploy this repository as a Dockerfile-built worker service
 
 ## Step 2: Add a PostgreSQL service
 
@@ -85,9 +126,9 @@ Why this matters:
 1. Add a new service from your repository source.
 2. Choose the repository root as the build context.
 3. Let Railway detect the root `Dockerfile`.
-4. Keep the default start command unless you have already customized it elsewhere.
+4. Keep the build and start command aligned with the checked-in `railway.json`.
 
-The image's default command is:
+The runtime command Railway should use is:
 
 ```text
 node dist/app.js
@@ -97,6 +138,7 @@ Why this matters:
 
 - that is the long-running worker that replaces the local Compose `app` service
 - you do not need a separate web server process for Socket Mode
+- keeping the command in `railway.json` makes the deployment behavior reviewable in Git
 
 ## Step 4: Configure environment variables and secrets
 
@@ -126,13 +168,15 @@ Why this matters:
 - the app validates these variables at startup
 - a missing required variable will cause the container to fail before the worker is usable
 
-## Step 5: Configure migrations as a pre-deploy command
+## Step 5: Confirm the pre-deploy migration command from `railway.json`
 
-In the application service settings, add this pre-deploy command:
+The checked-in Railway config already defines this pre-deploy command:
 
 ```bash
 node dist/db/migrate.js
 ```
+
+Confirm Railway shows that command on the deployment details page or service settings for the application service.
 
 Why this is the Railway equivalent of the Compose `migrate` service:
 
@@ -144,7 +188,26 @@ Why you should do this even on the first deploy:
 - the worker expects the schema to exist
 - running migrations before startup avoids a deploy that boots successfully but fails when it first touches the database
 
-## Step 6: Do not optimize for HTTP ingress
+## Step 6: Configure GitHub autodeploys from `main`
+
+In the application service settings:
+
+1. keep the service source connected to this repository
+2. set the trigger branch to `main`
+3. leave automatic deployments enabled
+4. enable `Wait for CI`
+
+Why this matters:
+
+- Railway automatically deploys new commits from the linked branch
+- `Wait for CI` ensures Railway waits for the repository's GitHub Actions checks before it starts a deployment
+- this repository already has a `push` workflow on `main` in `.github/workflows/docker-sanity-checks.yml`, so it satisfies Railway's CI gate requirement
+
+Important edge case:
+
+- if a commit is authored by someone who has not linked their GitHub identity to Railway, Railway may require a manual deployment approval before it proceeds
+
+## Step 7: Do not optimize for HTTP ingress
 
 This app does not need public HTTP traffic for Slack events, because it uses Socket Mode.
 
@@ -159,11 +222,17 @@ If Railway suggests or expects an HTTP healthcheck:
 - do not point it at a fake endpoint that does not exist
 - prefer worker-style deployment assumptions over web-service assumptions
 
-## Step 7: Deploy
+Do not set a `healthcheckPath` in Railway or in `railway.json` for this version:
+
+- Railway healthchecks are HTTP-based
+- this worker does not expose an HTTP readiness endpoint
+- the most useful readiness signals here are successful migrations and runtime logs
+
+## Step 8: Deploy
 
 Once the variables and pre-deploy command are set:
 
-1. trigger the deployment
+1. trigger the first deployment manually from the latest `main` commit
 2. watch the build logs
 3. confirm the pre-deploy migration step runs
 4. confirm Railway starts the long-running worker container after migrations succeed
@@ -173,6 +242,14 @@ The expected high-level sequence is:
 1. Railway builds the Docker image
 2. Railway runs `node dist/db/migrate.js`
 3. Railway starts the service with `node dist/app.js`
+
+After that first successful deployment:
+
+1. push a no-op commit to `main`
+2. confirm Railway moves the deployment into `WAITING` while GitHub Actions runs
+3. confirm Railway deploys automatically after the checks succeed
+
+If the GitHub workflow fails, Railway should skip the deployment instead of starting it anyway.
 
 ## Run migrations manually when needed
 
@@ -214,7 +291,11 @@ If the worker starts and then exits immediately, the most common causes are:
 - a missing migration
 - missing Slack secrets
 
-### 5. Optional preflight check
+### 5. No HTTP healthcheck path is configured
+
+Confirm the service is not configured with an HTTP healthcheck path for this worker deployment.
+
+### 6. Optional preflight check
 
 The image also contains a preflight command:
 

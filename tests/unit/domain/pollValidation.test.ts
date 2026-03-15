@@ -5,6 +5,8 @@ import { systemClock } from "../../../src/lib/clock.js";
 
 describe("validateCreatePollInput", () => {
   it("normalizes a valid poll request", () => {
+    const closesAt = new Date(systemClock.now().getTime() + 60_000);
+
     const result = validateCreatePollInput(
       {
         workspaceId: "workspace_1",
@@ -19,7 +21,7 @@ describe("validateCreatePollInput", () => {
         allowVoteChanges: true,
         allowOptionAdditions: false,
         resultsVisibility: "always_visible",
-        closesAt: new Date("2026-03-14T12:00:00.000Z"),
+        closesAt,
       },
       systemClock,
     );
