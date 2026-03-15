@@ -14,6 +14,7 @@ Use this skill only when the current workspace is the `free-slack-poll` reposito
    - `docs/deployment/railway.md`
    - `scripts/railway-assist.sh`
    - `.env.railway.example` when variable sync is relevant
+   - `references/local-env-sync.md` when the user wants local env files or Railway variable sync
    - `references/slack-tokens.md` when Slack credentials are missing
 2. Start with `./scripts/railway-assist.sh doctor` unless the user already gave enough Railway state.
 3. If `doctor` reports that Railway CLI is missing, install it before doing anything else. Prefer:
@@ -26,6 +27,10 @@ Use this skill only when the current workspace is the `free-slack-poll` reposito
 6. For status and troubleshooting, use `status`, `logs`, `redeploy`, or `restart` through the helper.
 7. If Railway bootstrap is blocked on missing Slack secrets, load `references/slack-tokens.md` and give the user the recommended Slack app/token path for this repo before asking for credentials.
    - Be explicit that Slack's Socket Mode examples often only require `xoxb` + `xapp`, but this repo currently also validates and passes `SLACK_SIGNING_SECRET`, so the user should gather all three values.
+8. If the user wants to keep deployment secrets in local gitignored env files or push them to Railway, load `references/local-env-sync.md`.
+   - Prefer `.env.railway` as the Railway sync source.
+   - If the user explicitly asks to update local env files, create or update `.env`, `.env.compose`, and `.env.railway` from the checked-in examples.
+   - Recommend `vars-push --dry-run` before a real sync when the file contents are new or user-supplied.
 
 ## Guardrails
 
@@ -33,6 +38,7 @@ Use this skill only when the current workspace is the `free-slack-poll` reposito
 - Do not create or destroy Railway resources unless the user explicitly asks.
 - Do not push variables from a local env file unless the user explicitly asks.
 - Do not import `DATABASE_URL` from a local env file unless the user explicitly confirms that the value is meant for Railway.
+- Do not write Slack client secret into local env files or Railway variables for this repo unless the user is explicitly moving to an OAuth distribution flow that needs it.
 - For this repo, prefer Slack app creation from `manifest/slack.app-manifest.yaml` over creating the app from scratch.
 - Do not ask for Slack user tokens or config tokens for normal Railway runtime; this repo needs the signing secret, bot token, and app-level token.
 - If the user asks about alternatives, explain the difference between:
@@ -47,6 +53,7 @@ Use this skill only when the current workspace is the `free-slack-poll` reposito
 ./scripts/railway-assist.sh doctor
 ./scripts/railway-assist.sh bootstrap --create-project --project free-slack-poll --workspace "My Workspace" --service app
 ./scripts/railway-assist.sh bootstrap --project <project> --environment production --service <service>
+./scripts/railway-assist.sh vars-push --env-file .env.railway --dry-run
 ./scripts/railway-assist.sh vars-push --env-file .env.railway
 ./scripts/railway-assist.sh deploy --verify=full
 ./scripts/railway-assist.sh status
