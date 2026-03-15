@@ -19,6 +19,8 @@ Use this skill only when the current workspace is the `free-slack-poll` reposito
    - `brew install railway`
    - fall back to `npm install -g @railway/cli` or `bun add -g @railway/cli`
 4. For first-time local CLI setup, use `./scripts/railway-assist.sh bootstrap`.
+   - If the Railway project already exists, pass `--project <name-or-id>`.
+   - If it does not exist yet, use `--create-project --project <name> --workspace <workspace>`.
 5. For manual deployments, use `./scripts/railway-assist.sh deploy`.
 6. For status and troubleshooting, use `status`, `logs`, `redeploy`, or `restart` through the helper.
 
@@ -34,6 +36,7 @@ Use this skill only when the current workspace is the `free-slack-poll` reposito
 
 ```bash
 ./scripts/railway-assist.sh doctor
+./scripts/railway-assist.sh bootstrap --create-project --project free-slack-poll --workspace "My Workspace" --service app
 ./scripts/railway-assist.sh bootstrap --project <project> --environment production --service <service>
 ./scripts/railway-assist.sh vars-push --env-file .env.railway
 ./scripts/railway-assist.sh deploy --verify=full

@@ -24,10 +24,11 @@ Commands:
   doctor
       Check repo prerequisites, Railway CLI installation, authentication, and link status.
 
-  bootstrap [--browserless] [--project <name-or-id>] [--environment <name-or-id>] [--service <name-or-id>]
-            [--env-file <path>] [--include-database-url] [--verify <none|fast|full>]
-      First-time local CLI bootstrap. Logs in, links the project/environment/service, and can push
-      allowed variables from an explicit env file. This does not create GitHub autodeploys or Wait for CI.
+  bootstrap [--browserless] [--project <name-or-id>] [--create-project] [--workspace <name-or-id>]
+            [--environment <name-or-id>] [--service <name-or-id>] [--env-file <path>]
+            [--include-database-url] [--verify <none|fast|full>]
+      First-time local CLI bootstrap. Logs in, links or creates the project/environment/service, and can
+      push allowed variables from an explicit env file. This does not create GitHub autodeploys or Wait for CI.
 
   deploy [--service <name-or-id>] [--environment <name-or-id>] [--verify <none|fast|full>]
          [--detach | --ci]
@@ -53,6 +54,7 @@ Commands:
 
 Examples:
   ./scripts/railway-assist.sh doctor
+  ./scripts/railway-assist.sh bootstrap --create-project --project free-slack-poll --workspace "My Workspace" --service app
   ./scripts/railway-assist.sh bootstrap --project free-slack-poll --environment production --service app
   ./scripts/railway-assist.sh vars-push --env-file .env.railway
   ./scripts/railway-assist.sh deploy --verify=full
@@ -250,7 +252,11 @@ push_variables_from_env_file() {
 			continue
 		fi
 
-		railway variable set "${args[@]}" --skip-deploys "$key=$value"
+		if [[ ${#args[@]} -gt 0 ]]; then
+			railway variable set "${args[@]}" --skip-deploys "$key=$value"
+		else
+			railway variable set --skip-deploys "$key=$value"
+		fi
 		applied_count=$((applied_count + 1))
 	done <"$env_file"
 
@@ -319,6 +325,8 @@ EOF
 bootstrap_command() {
 	local browserless=0
 	local project=""
+	local create_project=0
+	local workspace=""
 	local environment="production"
 	local service=""
 	local env_file=""
@@ -334,6 +342,14 @@ bootstrap_command() {
 			shift
 			project="${1:-}"
 			[[ -n "$project" ]] || die "--project requires a value"
+			;;
+		--create-project)
+			create_project=1
+			;;
+		--workspace)
+			shift
+			workspace="${1:-}"
+			[[ -n "$workspace" ]] || die "--workspace requires a value"
 			;;
 		--environment)
 			shift
@@ -370,7 +386,16 @@ bootstrap_command() {
 	run_verification "$verify_mode"
 	ensure_login "$browserless"
 
-	if [[ -n "$project" ]]; then
+	if [[ "$create_project" -eq 1 ]]; then
+		[[ -n "$project" ]] || die "--create-project requires --project <name>"
+		log "Creating Railway project: $project"
+
+		if [[ -n "$workspace" ]]; then
+			railway init --name "$project" --workspace "$workspace" --json >/dev/null
+		else
+			railway init --name "$project" --json >/dev/null
+		fi
+	elif [[ -n "$project" ]]; then
 		log "Linking Railway project: $project"
 		railway project link "$project"
 	elif ! railway_linked; then
@@ -530,7 +555,11 @@ status_command() {
 		args+=(--all)
 	fi
 
-	railway service status "${args[@]}"
+	if [[ ${#args[@]} -gt 0 ]]; then
+		railway service status "${args[@]}"
+	else
+		railway service status
+	fi
 }
 
 logs_command() {
