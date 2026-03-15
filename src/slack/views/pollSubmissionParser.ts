@@ -1,4 +1,7 @@
-import type { CreatePollInput, PollResultsVisibility } from "../../domain/polls/types.js";
+import type {
+  CreatePollInput,
+  PollResultsVisibility,
+} from "../../domain/polls/types.js";
 import type { PollModalMetadata } from "../metadata/pollModalMetadata.js";
 import { slackBlockIds } from "../ids.js";
 import type { SlackViewStateValues } from "../../types/slack.js";
@@ -20,9 +23,13 @@ export function extractPollFormValues(
   stateValues: SlackViewStateValues,
   metadata: PollModalMetadata,
 ): PollFormValues {
-  const question = getPlainTextValue(stateValues, slackBlockIds.question, "value") ?? metadata.initialQuestion ?? "";
+  const question =
+    getPlainTextValue(stateValues, slackBlockIds.question, "value") ??
+    metadata.initialQuestion ??
+    "";
   const description =
-    getPlainTextValue(stateValues, slackBlockIds.description, "value") ?? metadata.initialDescription;
+    getPlainTextValue(stateValues, slackBlockIds.description, "value") ??
+    metadata.initialDescription;
 
   return {
     allowOptionAdditions: getCheckboxValue(
@@ -38,21 +45,41 @@ export function extractPollFormValues(
       "enabled",
     ),
     allowsMultipleChoices:
-      getStaticSelectValue(stateValues, slackBlockIds.pollType, "value") === "multiple",
+      getStaticSelectValue(stateValues, slackBlockIds.pollType, "value") ===
+      "multiple",
     closesAt: getDateTimeValue(stateValues, slackBlockIds.closeAt, "value"),
     description,
-    isAnonymous: getCheckboxValue(stateValues, slackBlockIds.anonymous, "value", "enabled"),
+    isAnonymous: getCheckboxValue(
+      stateValues,
+      slackBlockIds.anonymous,
+      "value",
+      "enabled",
+    ),
     optionTexts: Array.from({ length: metadata.optionCount }, (_, index) => {
-      return getPlainTextValue(stateValues, `${slackBlockIds.optionRow}_${index}`, "value") ?? "";
+      return (
+        getPlainTextValue(
+          stateValues,
+          `${slackBlockIds.optionRow}_${index}`,
+          "value",
+        ) ?? ""
+      );
     }),
     question,
     resultsVisibility:
-      getStaticSelectValue(stateValues, slackBlockIds.resultsVisibility, "value") === "hidden_until_closed"
+      getStaticSelectValue(
+        stateValues,
+        slackBlockIds.resultsVisibility,
+        "value",
+      ) === "hidden_until_closed"
         ? "hidden_until_closed"
         : "always_visible",
     targetConversationId:
       metadata.sourceConversationId ??
-      getConversationValue(stateValues, slackBlockIds.targetConversation, "value"),
+      getConversationValue(
+        stateValues,
+        slackBlockIds.targetConversation,
+        "value",
+      ),
   };
 }
 
@@ -89,7 +116,9 @@ function getPlainTextValue(
 ) {
   const maybeValue = stateValues[blockId]?.[actionId];
 
-  return maybeValue?.type === "plain_text_input" ? maybeValue.value ?? null : null;
+  return maybeValue?.type === "plain_text_input"
+    ? (maybeValue.value ?? null)
+    : null;
 }
 
 function getStaticSelectValue(
@@ -99,7 +128,9 @@ function getStaticSelectValue(
 ) {
   const maybeValue = stateValues[blockId]?.[actionId];
 
-  return maybeValue?.type === "static_select" ? maybeValue.selected_option?.value : undefined;
+  return maybeValue?.type === "static_select"
+    ? maybeValue.selected_option?.value
+    : undefined;
 }
 
 function getCheckboxValue(
@@ -111,7 +142,9 @@ function getCheckboxValue(
   const maybeValue = stateValues[blockId]?.[actionId];
 
   return maybeValue?.type === "checkboxes"
-    ? maybeValue.selected_options?.some((option) => option.value === selectedValue) ?? false
+    ? (maybeValue.selected_options?.some(
+        (option) => option.value === selectedValue,
+      ) ?? false)
     : false;
 }
 
@@ -123,16 +156,33 @@ function getConversationValue(
   const maybeValue = stateValues[blockId]?.[actionId];
 
   return maybeValue?.type === "conversations_select"
-    ? maybeValue.selected_conversation ?? null
+    ? (maybeValue.selected_conversation ?? null)
     : null;
 }
 
-function getDateTimeValue(stateValues: SlackViewStateValues, blockId: string, actionId: string) {
+function getDateTimeValue(
+  stateValues: SlackViewStateValues,
+  blockId: string,
+  actionId: string,
+) {
   const maybeValue = stateValues[blockId]?.[actionId];
 
-  if (maybeValue?.type !== "datetimepicker" || maybeValue.selected_date_time === undefined) {
+  if (maybeValue?.type !== "datetimepicker") {
     return null;
   }
 
-  return new Date(maybeValue.selected_date_time * 1000);
+  const rawValue = maybeValue.selected_date_time;
+
+  if (rawValue === undefined || rawValue === null || rawValue === "") {
+    return null;
+  }
+
+  const unixTimestamp =
+    typeof rawValue === "string" ? Number.parseInt(rawValue, 10) : rawValue;
+
+  if (!Number.isFinite(unixTimestamp) || unixTimestamp <= 0) {
+    return null;
+  }
+
+  return new Date(unixTimestamp * 1000);
 }

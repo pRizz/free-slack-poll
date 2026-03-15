@@ -24,7 +24,7 @@ export interface SlackConversationSelectValue {
 
 export interface SlackDatetimePickerValue {
   type: "datetimepicker";
-  selected_date_time?: number;
+  selected_date_time?: number | string | null;
 }
 
 export type SlackViewValue =
@@ -34,7 +34,10 @@ export type SlackViewValue =
   | SlackPlainTextInputValue
   | SlackStaticSelectValue;
 
-export type SlackViewStateValues = Record<string, Record<string, SlackViewValue>>;
+export type SlackViewStateValues = Record<
+  string,
+  Record<string, SlackViewValue>
+>;
 
 export interface SlackButtonActionBody {
   actions: Array<{

@@ -38,7 +38,7 @@ export function buildAppHomeBlocks(viewModel: AppHomeViewModel): KnownBlock[] {
         },
         {
           type: "button",
-          action_id: slackActionIds.homeSetFilter,
+          action_id: slackActionIds.homeSetFilterOpen,
           text: {
             type: "plain_text",
             text: "Open",
@@ -48,7 +48,7 @@ export function buildAppHomeBlocks(viewModel: AppHomeViewModel): KnownBlock[] {
         },
         {
           type: "button",
-          action_id: slackActionIds.homeSetFilter,
+          action_id: slackActionIds.homeSetFilterClosed,
           text: {
             type: "plain_text",
             text: "Closed",
@@ -75,7 +75,10 @@ export function buildAppHomeBlocks(viewModel: AppHomeViewModel): KnownBlock[] {
         text: "*Your recent polls*",
       },
     },
-    ...buildPollSummaryBlocks(viewModel.recentPolls, "You have not created any polls yet."),
+    ...buildPollSummaryBlocks(
+      viewModel.recentPolls,
+      "You have not created any polls yet.",
+    ),
     {
       type: "divider",
     },
@@ -86,13 +89,19 @@ export function buildAppHomeBlocks(viewModel: AppHomeViewModel): KnownBlock[] {
         text: "*Polls you can manage*",
       },
     },
-    ...buildPollSummaryBlocks(viewModel.manageablePolls, "No manageable polls found."),
+    ...buildPollSummaryBlocks(
+      viewModel.manageablePolls,
+      "No manageable polls found.",
+    ),
   ];
 
   return blocks;
 }
 
-function buildPollSummaryBlocks(polls: PollRecord[], emptyMessage: string): KnownBlock[] {
+function buildPollSummaryBlocks(
+  polls: PollRecord[],
+  emptyMessage: string,
+): KnownBlock[] {
   if (polls.length === 0) {
     return [
       {
@@ -113,7 +122,9 @@ function buildPollSummaryBlocks(polls: PollRecord[], emptyMessage: string): Know
         text: [
           `*${poll.question}*`,
           `Status: ${poll.status}`,
-          poll.messagePermalink !== null ? `<${poll.messagePermalink}|Open poll message>` : null,
+          poll.messagePermalink !== null
+            ? `<${poll.messagePermalink}|Open poll message>`
+            : null,
         ]
           .filter((line) => line !== null)
           .join("\n"),
