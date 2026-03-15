@@ -15,9 +15,12 @@ Use this skill only when the current workspace is the `free-slack-poll` reposito
    - `scripts/railway-assist.sh`
    - `.env.railway.example` when variable sync is relevant
 2. Start with `./scripts/railway-assist.sh doctor` unless the user already gave enough Railway state.
-3. For first-time local CLI setup, use `./scripts/railway-assist.sh bootstrap`.
-4. For manual deployments, use `./scripts/railway-assist.sh deploy`.
-5. For status and troubleshooting, use `status`, `logs`, `redeploy`, or `restart` through the helper.
+3. If `doctor` reports that Railway CLI is missing, install it before doing anything else. Prefer:
+   - `brew install railway`
+   - fall back to `npm install -g @railway/cli` or `bun add -g @railway/cli`
+4. For first-time local CLI setup, use `./scripts/railway-assist.sh bootstrap`.
+5. For manual deployments, use `./scripts/railway-assist.sh deploy`.
+6. For status and troubleshooting, use `status`, `logs`, `redeploy`, or `restart` through the helper.
 
 ## Guardrails
 
