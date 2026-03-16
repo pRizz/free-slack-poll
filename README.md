@@ -243,6 +243,54 @@ Stop everything and remove volumes:
 docker compose --env-file .env.compose down --volumes
 ```
 
+## Self-hosting
+
+For hosted self-hosting, Railway is the most direct path already documented in this repo.
+
+Primary path in Codex:
+
+```text
+$free-slack-poll-railway
+
+Help me self-host this repo on Railway. Use the repo helper workflow, guide me through `.env.railway`, link or bootstrap the Railway project/service, push variables safely, and deploy.
+```
+
+That skill follows the checked-in Railway workflow for this repo and will prefer the helper script plus the full guide in [`docs/deployment/railway.md`](docs/deployment/railway.md).
+
+Manual fallback:
+
+1. Create a Slack app from `manifest/slack.app-manifest.yaml` and gather:
+   - `SLACK_SIGNING_SECRET`
+   - `SLACK_BOT_TOKEN`
+   - `SLACK_APP_TOKEN`
+2. Copy the Railway env template:
+
+```bash
+cp .env.railway.example .env.railway
+```
+
+3. Fill in `.env.railway` with your Slack secrets and runtime settings.
+4. Use the repo helper to verify Railway CLI state and link this repo to your Railway service:
+
+```bash
+bun run railway:doctor
+bun run railway:bootstrap -- --project <project> --environment production --service app
+```
+
+5. Stage variables before the first deploy:
+
+```bash
+bun run railway:vars:push -- --env-file .env.railway --dry-run
+```
+
+6. Deploy with the helper:
+
+```bash
+bun run railway:deploy -- --verify=full
+```
+
+The helper script lives at `scripts/railway-assist.sh` and follows the workflow documented in [`docs/deployment/railway.md`](docs/deployment/railway.md). For platform context across Railway, Render, Fly.io, and Coolify, see [`docs/deployment/README.md`](docs/deployment/README.md).
+
 ## Platform deployment guides
 
 The local Compose file is the baseline deployment model for this project. Dedicated platform guides explain how to use that same Docker / Compose architecture on hosted platforms:
@@ -252,6 +300,7 @@ The local Compose file is the baseline deployment model for this project. Dedica
 - [`docs/deployment/render.md`](docs/deployment/render.md) — Render guide
 - [`docs/deployment/fly-io.md`](docs/deployment/fly-io.md) — Fly.io guide
 - [`docs/deployment/coolify.md`](docs/deployment/coolify.md) — Coolify guide
+- [`docs/distribution/slack-marketplace.md`](docs/distribution/slack-marketplace.md) — Slack distribution and Marketplace viability notes
 
 The guides call out where a platform supports a native Compose flow directly and where the Compose services need to be translated into platform-specific resources such as managed Postgres, pre-deploy migration commands, or worker services.
 

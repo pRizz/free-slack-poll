@@ -1,5 +1,22 @@
 # Todo
 
+## Distribution And Self-hosting Docs
+
+- [x] Document current Slack Marketplace and public-distribution viability for this repo.
+- [x] Add README self-hosting guidance that points at the Railway helper workflow.
+- [x] Link the new distribution guidance from the README.
+
+## Distribution And Self-hosting Verification
+
+- [x] Review `README.md`
+- [x] Review `docs/distribution/slack-marketplace.md`
+
+## Distribution And Self-hosting Completion Review
+
+- Added a dedicated repo doc describing Slack public distribution vs Marketplace listing, the Socket Mode blocker, and the likely future migration path.
+- Added a concise Railway-based self-hosting section to the README that points at the checked-in helper commands and the full Railway deployment guide.
+- Residual risk: the Marketplace doc reflects Slack guidance checked on 2026-03-15 and should be revalidated before any actual OAuth or Marketplace implementation work begins.
+
 ## Basic Slack UAT Regression
 
 - [x] Define a basic Slack UAT checklist for poll creation, voting, manager UI, and close flows.
