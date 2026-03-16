@@ -1,5 +1,23 @@
 # Todo
 
+## Basic Slack UAT Regression
+
+- [x] Define a basic Slack UAT checklist for poll creation, voting, manager UI, and close flows.
+- [x] Execute the basic Slack UAT checklist in Bright Builds Slack.
+- [x] Record pass/fail results and follow-up risks in the dated UAT artifacts.
+
+## Basic Slack UAT Verification
+
+- [x] Browser-based UAT against `https://brightbuildsllc.slack.com/`
+- [x] Update `.codex/tasks/slack-basic-uat-checklist-2026-03-15.md`
+- [x] Update `.codex/tasks/slack-uat-2026-03-15.md`
+
+## Basic Slack UAT Completion Review
+
+- The basic Slack flows passed for unscheduled visible polls, anonymous scheduled multi-choice polls, and hidden-results polls, including App Home metadata and details-modal metadata checks.
+- The new manager metadata rendered correctly in App Home `Open` and `Closed`, and the details modal showed creator, created time, channel, and closed timing above the option breakdown.
+- Residual risk: App Home `Open` stayed stale immediately after a manual close from the channel message until the Home view was refreshed or the filter was toggled, which suggests a refresh/state-sync gap in the manager UI.
+
 ## Poll Metadata UI
 
 - [x] Surface creator and distinguishing metadata in App Home summaries.
