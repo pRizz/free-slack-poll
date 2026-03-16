@@ -1,6 +1,7 @@
 # Logs
 logs
 *.log
+.playwright-cli/
 output/playwright/
 npm-debug.log*
 yarn-debug.log*
